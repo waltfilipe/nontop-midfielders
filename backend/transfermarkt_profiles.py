@@ -71,6 +71,30 @@ def _pick_tmkt_search_result(
     return best_row if best_score >= 0.45 else None
 
 
+def _format_tm_height(height: Any) -> str | None:
+    if height is None:
+        return None
+    try:
+        meters = float(height)
+    except (TypeError, ValueError):
+        return None
+    if 1.40 <= meters <= 2.20:
+        return f"{meters:.2f} m"
+    return None
+
+
+def _format_tm_foot(preferred_foot: Any) -> str | None:
+    if isinstance(preferred_foot, dict):
+        name = preferred_foot.get("name")
+    else:
+        name = preferred_foot
+    if not name:
+        return None
+    text = str(name).strip().lower()
+    mapping = {"left": "Left", "right": "Right", "both": "Both"}
+    return mapping.get(text, str(name).strip().capitalize())
+
+
 def _transfermarkt_fields_from_player_payload(payload: dict[str, Any]) -> dict[str, Any]:
     data = payload.get("data") if isinstance(payload.get("data"), dict) else payload
     current = (data.get("marketValueDetails") or {}).get("current") or {}
@@ -86,13 +110,21 @@ def _transfermarkt_fields_from_player_payload(payload: dict[str, Any]) -> dict[s
     elif value_eur is not None:
         display = format_market_value_eur(int(value_eur))
     portrait = data.get("portraitUrl")
-    contract_until = (data.get("attributes") or {}).get("contractUntil")
+    attributes = data.get("attributes") or {}
+    contract_until = attributes.get("contractUntil")
+    life_dates = data.get("lifeDates") or {}
+    date_of_birth = life_dates.get("dateOfBirth")
+    age = life_dates.get("age")
     return {
         MARKET_VALUE_EUR_KEY: int(value_eur) if value_eur is not None else None,
         MARKET_VALUE_DISPLAY_KEY: display,
         MARKET_VALUE_UPDATED_KEY: current.get("determined"),
         TRANSFERMARKT_PHOTO_URL_KEY: str(portrait) if portrait else None,
         CONTRACT_UNTIL_KEY: str(contract_until)[:10] if contract_until else None,
+        "height": _format_tm_height(attributes.get("height")),
+        "dominant_foot": _format_tm_foot(attributes.get("preferredFoot")),
+        "date_of_birth": str(date_of_birth)[:10] if date_of_birth else None,
+        "age": int(age) if age is not None else None,
     }
 
 
@@ -163,6 +195,10 @@ def transfermarkt_cache_is_fresh(player_id: str, *, force: bool = False) -> bool
         return False
     if profile.get(MARKET_VALUE_EUR_KEY) is not None or profile.get(MARKET_VALUE_DISPLAY_KEY):
         return True
+    if profile.get(TRANSFERMARKT_PHOTO_URL_KEY) and profile.get(CONTRACT_UNTIL_KEY):
+        return True
+    if profile.get(TRANSFERMARKT_ID_KEY) and profile.get("height") and profile.get("dominant_foot"):
+        return True
     return profile.get(TRANSFERMARKT_FETCH_STATUS_KEY) == "not_found"
 
 
@@ -216,7 +252,13 @@ async def fetch_transfermarkt_market_value_async(
             label=f"player:{player_id}",
         )
         fields = _transfermarkt_fields_from_player_payload(payload if isinstance(payload, dict) else {})
-        status = "ok" if fields.get(MARKET_VALUE_EUR_KEY) is not None else "not_found"
+        status = "ok" if (
+            fields.get(MARKET_VALUE_EUR_KEY) is not None
+            or fields.get(TRANSFERMARKT_PHOTO_URL_KEY)
+            or fields.get(CONTRACT_UNTIL_KEY)
+            or fields.get("height")
+            or fields.get("age") is not None
+        ) else "not_found"
         return {
             TRANSFERMARKT_ID_KEY: str(player_id),
             TRANSFERMARKT_FETCH_STATUS_KEY: status,
