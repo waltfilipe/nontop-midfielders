@@ -1,10 +1,10 @@
 import { Suspense } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { PageHero } from "@/components/PageHero";
 import { POSITION_FAMILIES } from "@/lib/positionFamilies";
 import { getMeta, getPlayers } from "@/lib/api";
 import { PlayersFilters } from "./PlayersFilters";
+import { formatLeagueName } from "@/lib/formatters";
 
 type PageProps = {
   searchParams: Promise<{
@@ -20,13 +20,17 @@ function formatRating(value: number | null | undefined): string {
   return value.toFixed(1);
 }
 
+function formatLetter(value: string | null | undefined): string {
+  return value?.trim() ? value : "—";
+}
+
 export default async function PlayersPage({ searchParams }: PageProps) {
   const params = await searchParams;
   let data = { total: 0, players: [] as Awaited<ReturnType<typeof getPlayers>>["players"] };
   let filters = { leagues: [] as string[], position_groups: [] as string[] };
   let error: string | null = null;
 
-  let positionFamilies = [...POSITION_FAMILIES];
+  let positionFamilies: { key: string; label: string }[] = [...POSITION_FAMILIES];
 
   const family = params.position_family ?? "midfielders";
 
@@ -54,7 +58,7 @@ export default async function PlayersPage({ searchParams }: PageProps) {
     <div className="container">
       <PageHero
         title="Players"
-        subtitle="Meio-campistas das 6 ligas europeias com ratings de passe e progressão."
+        subtitle="Meio-campistas das 6 ligas europeias com ratings de passe e pilares por pool."
         icon="fa-table-list"
       />
 
@@ -76,63 +80,52 @@ export default async function PlayersPage({ searchParams }: PageProps) {
         {data.total} jogador{data.total !== 1 ? "es" : ""} encontrado{data.total !== 1 ? "s" : ""}
       </p>
 
+      <Link href="/reports" className="reports-promo-card report-screen-only">
+        <span className="reports-promo-icon">
+          <i className="fa-solid fa-file-lines" />
+        </span>
+        <span className="reports-promo-text">
+          <strong>Reports</strong>
+          <span className="muted">
+            Relatórios PDF-ready — U23 Breakout, Blue Collar 24–30 e Experience 30+
+          </span>
+        </span>
+        <span className="reports-promo-cta">
+          Ver relatórios <i className="fa-solid fa-arrow-right" />
+        </span>
+      </Link>
+
       <div className="table-wrap">
         <table>
           <thead>
             <tr>
               <th>Jogador</th>
               <th>Liga</th>
-              <th>Posição</th>
               <th>Idade</th>
               <th>Pass Rating</th>
-              <th>Progressão</th>
-              <th>Passes</th>
-              <th>xT/Pass</th>
+              <th>Volume</th>
+              <th>Efficiency</th>
+              <th>Build-up</th>
+              <th>Chance creation</th>
             </tr>
           </thead>
           <tbody>
             {data.players.map((player) => (
               <tr key={player.player_id}>
                 <td>
-                  <div className="player-cell">
-                    {player.photo_url ? (
-                      <Image
-                        src={player.photo_url}
-                        alt=""
-                        width={36}
-                        height={36}
-                        className="player-avatar"
-                        unoptimized
-                      />
-                    ) : (
-                      <div className="player-avatar" />
-                    )}
-                    <div>
-                      <Link href={`/profile?player=${player.player_id}&position_family=${family}`}>{player.player_name}</Link>
-                      <div className="muted" style={{ fontSize: "0.8rem" }}>
-                        {player.nationality ?? "—"}
-                      </div>
-                    </div>
-                  </div>
+                  <Link href={`/profile?player=${player.player_id}&position_family=${family}`}>
+                    {player.player_name}
+                  </Link>
                 </td>
-                <td>
-                  <span className="badge">{player.league_source ?? player.league ?? "—"}</span>
-                </td>
-                <td>{player.position_group ?? player.position ?? "—"}</td>
+                <td>{formatLeagueName(player.league, player.league_source)}</td>
                 <td>{player.age ?? "—"}</td>
                 <td>
-                  <span className="rating">{formatRating(player.pass_rating)}</span>
-                  {player.pass_rating_rank != null && (
-                    <span className="muted" style={{ fontSize: "0.75rem", marginLeft: "0.35rem" }}>
-                      #{player.pass_rating_rank}
-                    </span>
-                  )}
+                  <span className="rating tabular">{formatRating(player.pass_rating)}</span>
                 </td>
-                <td>
-                  <span className="rating">{formatRating(player.progression_rating)}</span>
-                </td>
-                <td>{player.total_passes?.toLocaleString() ?? "—"}</td>
-                <td>{player.xt_per_pass != null ? player.xt_per_pass.toFixed(4) : "—"}</td>
+                <td><span className="grade-letter">{formatLetter(player.pass_volume_letter)}</span></td>
+                <td><span className="grade-letter">{formatLetter(player.pass_efficiency_letter)}</span></td>
+                <td><span className="grade-letter">{formatLetter(player.pass_buildup_letter)}</span></td>
+                <td><span className="grade-letter">{formatLetter(player.pass_chance_creation_letter)}</span></td>
               </tr>
             ))}
             {data.players.length === 0 && !error && (

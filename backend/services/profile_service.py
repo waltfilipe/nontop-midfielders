@@ -60,6 +60,20 @@ def build_xp_profile_bars(xp_profile: dict) -> list[dict[str, Any]]:
     return bars
 
 
+def build_round_grade_series(xp_profile: dict) -> list[dict[str, Any]]:
+    series = xp_profile.get("xp_round_series") or []
+    grades = xp_profile.get("xp_game_grades") or ()
+    out: list[dict[str, Any]] = []
+    for i, point in enumerate(series):
+        grade = grades[i] if i < len(grades) else None
+        out.append({
+            "round": point.get("round", i + 1),
+            "grade": grade,
+            "opponent": point.get("opponent"),
+        })
+    return out
+
+
 def origin_heatmap_b64(player_id: str, passes_by_player: dict, player_name: str) -> str | None:
     passes_df = passes_by_player.get(player_id)
     if passes_df is None or passes_df.empty:
@@ -116,8 +130,24 @@ def build_profile_payload(
                 "label": "Impact",
                 "tier": xp.get("xp_idx_impact_tier"),
                 "tier_key": "xp_idx_impact",
-                "value": xp.get("test_impact_v2_p90"),
                 "icon": "fa-crosshairs",
+                "components": [
+                    {
+                        "key": "xpv_per_pass",
+                        "label": "xPV/Pass",
+                        "value": xp.get("xpv_per_pass"),
+                        "rank": xp.get("xpv_per_pass_rank_in_group"),
+                        "rank_pool": xp.get("xpv_per_pass_rank_pool_in_group"),
+                    },
+                    {
+                        "key": "xp_residual_mean",
+                        "label": "ΔxP/Pass",
+                        "value": xp.get("xp_residual_mean"),
+                        "rank": xp.get("xp_residual_mean_rank_in_group"),
+                        "rank_pool": xp.get("xp_residual_mean_rank_pool_in_group"),
+                    },
+                ],
             },
         ] if xp else [],
+        "xp_round_grades": build_round_grade_series(xp) if xp else [],
     }

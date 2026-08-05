@@ -29,31 +29,31 @@ export const COMPONENT_TOOLTIPS: Record<string, string> = {
   passes_to_box: "Passes completed into the box per 90 minutes.",
   special_line_break_p90: "Line-breaking passes per game — lateral exit bands, forward angle ≤ 50°.",
   test_impact_v2_start_final_third_p90:
-    "Test Impact v2 passes per game originating in the final third (x_start ≥ 72 m).",
+    "Impact passes per game originating in the final third (x_start ≥ 72 m).",
 };
 
 export const COMPONENT_LABELS: Record<string, string> = {
   passes_total: "Passes / game",
   long_balls: "Long passes / game",
-  xpass_coe_pct: "COE passe curto",
-  xpass_long_coe_pct: "COE passe longo",
+  xpass_coe_pct: "%Efficiency - Short Pass",
+  xpass_long_coe_pct: "%Efficiency - Long Pass",
   progressive_passes: "Progressive passes / game",
   final_third_passes: "Passes into final third / game",
   key_passes: "Key passes / game",
   passes_to_box: "Passes into box / game",
   special_line_break_p90: "Line breaking passes / game",
-  test_impact_v2_start_final_third_p90: "Impact v2 — final third / game",
+  test_impact_v2_start_final_third_p90: "Impact Passes / game",
 };
 
 export const INDEX_TOOLTIPS: Record<string, string> = {
   Consistency:
     "Each match gets a 3–9 grade from game xP vs. all peer matches in the position. Badge when dispersion of those grades is low (MAD).",
   Impact:
-    "50% xPV per completed pass and 50% Pass Impact v2 per game — destination value plus selective high-progression deliveries.",
+    "50% xPV per completed pass and 50% mean (xP − xP expected) per pass — destination value plus beating the geometric model.",
   xp_idx_consistency:
     "Each match gets a 3–9 grade from game xP vs. all peer matches in the position. Badge when dispersion of those grades is low (MAD).",
   xp_idx_impact:
-    "50% xPV per completed pass and 50% Pass Impact v2 per game — destination value plus selective high-progression deliveries.",
+    "50% xPV per completed pass and 50% mean (xP − xP expected) per pass — destination value plus beating the geometric model.",
 };
 
 export const PASS_GRADE_TOOLTIP =

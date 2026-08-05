@@ -37,6 +37,10 @@ export type PlayerSummary = {
   xp_pass_rating?: number | null;
   total_passes?: number | null;
   xt_per_pass?: number | null;
+  pass_volume_letter?: string | null;
+  pass_efficiency_letter?: string | null;
+  pass_buildup_letter?: string | null;
+  pass_chance_creation_letter?: string | null;
 };
 
 export type PlayerOption = {
@@ -64,6 +68,19 @@ export type XpIndexItem = {
   tier_key?: string | null;
   value?: number | null;
   icon?: string;
+  components?: {
+    key: string;
+    label: string;
+    value?: number | null;
+    rank?: number | null;
+    rank_pool?: number | null;
+  }[];
+};
+
+export type XpRoundGrade = {
+  round: number;
+  grade?: number | null;
+  opponent?: string | null;
 };
 
 export type PlayerProfile = {
@@ -79,6 +96,7 @@ export type PlayerProfile = {
   xp_game_consistency_score?: number | null;
   test_impact_v2_p90?: number | null;
   xp_indices?: XpIndexItem[];
+  xp_round_grades?: XpRoundGrade[];
 };
 
 export type CompareMetric = {
