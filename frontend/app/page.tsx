@@ -12,8 +12,8 @@ export default async function HomePage() {
       <section className="home-hero">
         <h1>Pass Scout</h1>
         <p>
-          Análise de passes por posição nas 5 grandes ligas europeias — xT v4, xP,
-          ratings de progressão e perfis comparativos dentro de cada pool.
+          Análise de passes de meio-campistas nas 6 ligas europeias — xT v4, xP,
+          ratings de progressão e perfis comparativos dentro do pool.
         </p>
         <div className="home-cta">
           <Link href="/profile" className="btn btn-primary">
@@ -34,7 +34,7 @@ export default async function HomePage() {
           <div className="label">Jogadores no pool</div>
         </div>
         <div className="card stat-card">
-          <div className="value">{meta.leagues.length || 5}</div>
+          <div className="value">{meta.leagues.length || 6}</div>
           <div className="label">Ligas europeias</div>
         </div>
         <div className="card stat-card">
@@ -45,7 +45,7 @@ export default async function HomePage() {
 
       <div className="card" style={{ textAlign: "center" }}>
         <p className="muted" style={{ marginBottom: "1rem" }}>
-          {meta.description || "Premier League, Serie A, La Liga, Bundesliga e Ligue 1."}
+          {meta.description || "Belgian Pro League, Croatia, Eredivisie, Greece, Portugal e Turkey."}
         </p>
         <Link href="/players" className="btn btn-ghost">
           <i className="fa-solid fa-table-list" /> Ver lista completa

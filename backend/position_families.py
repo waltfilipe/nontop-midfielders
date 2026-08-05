@@ -7,10 +7,7 @@ from heuristic_scoring import rating_position_group
 DEFAULT_POSITION_FAMILY = "midfielders"
 
 EUROPEAN_POSITION_FAMILIES: tuple[tuple[str, str], ...] = (
-    ("centerbacks", "Zagueiros"),
-    ("fullbacks", "Laterais"),
     ("midfielders", "Meio-campistas"),
-    ("wingers", "Extremos"),
 )
 
 EUROPEAN_POSITION_FAMILY_KEYS: tuple[str, ...] = tuple(

@@ -54,7 +54,7 @@ export default async function PlayersPage({ searchParams }: PageProps) {
     <div className="container">
       <PageHero
         title="Players"
-        subtitle="Jogadores das 5 grandes ligas europeias com ratings de passe e progressão por pool de posição."
+        subtitle="Meio-campistas das 6 ligas europeias com ratings de passe e progressão."
         icon="fa-table-list"
       />
 

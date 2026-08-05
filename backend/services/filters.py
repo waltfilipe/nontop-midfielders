@@ -55,11 +55,12 @@ LETTER_GRADE_OPTIONS = [
 
 LEAGUE_OPTIONS = [
     ("all", "All leagues"),
-    ("premier_league", "Premier League"),
-    ("italia_seriea", "Serie A"),
-    ("laliga", "La Liga"),
-    ("bundesliga", "Bundesliga"),
-    ("ligue1", "Ligue 1"),
+    ("belgian_pro_league", "Belgian Pro League"),
+    ("croatian_league", "Croatian League"),
+    ("eredivisie", "Eredivisie"),
+    ("greek_super_league", "Greek Super League"),
+    ("liga_portugal", "Liga Portugal"),
+    ("super_lig", "Süper Lig"),
 ]
 
 FOOT_OPTIONS = [

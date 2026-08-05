@@ -345,7 +345,10 @@ def build_team_xp_surfaces(
 
 @functools.lru_cache(maxsize=1)
 def _load_combined_league_pass_frame() -> pd.DataFrame:
-    """Copa do Mundo (+ optional club leagues when CSVs are present) for the global xP reference pool."""
+    """Club leagues configured in passes_engine for the xP reference pool."""
+    european = pe._load_european_league_pass_frame()
+    if not european.empty:
+        return european
     frames: list[pd.DataFrame] = []
     world_cup = pe._load_season_pass_frame()
     if not world_cup.empty:
@@ -357,31 +360,6 @@ def _load_combined_league_pass_frame() -> pd.DataFrame:
         sa = serie_a.copy()
         sa["league_source"] = "serie_a"
         frames.append(sa)
-    premier_league = pe._load_pl_pass_frame()
-    if not premier_league.empty:
-        pl = premier_league.copy()
-        pl["league_source"] = "premier_league"
-        frames.append(pl)
-    italia_seriea = pe._load_italia_seriea_pass_frame()
-    if not italia_seriea.empty:
-        it = italia_seriea.copy()
-        it["league_source"] = "italia_seriea"
-        frames.append(it)
-    laliga = pe._load_laliga_pass_frame()
-    if not laliga.empty:
-        ll = laliga.copy()
-        ll["league_source"] = "laliga"
-        frames.append(ll)
-    bundesliga = pe._load_bundesliga_pass_frame()
-    if not bundesliga.empty:
-        bl = bundesliga.copy()
-        bl["league_source"] = "bundesliga"
-        frames.append(bl)
-    ligue1 = pe._load_ligue1_pass_frame()
-    if not ligue1.empty:
-        lg = ligue1.copy()
-        lg["league_source"] = "ligue1"
-        frames.append(lg)
     if not frames:
         return pd.DataFrame()
     return pd.concat(frames, ignore_index=True)

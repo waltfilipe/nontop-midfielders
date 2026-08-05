@@ -14,20 +14,20 @@
   "threat_xp_quantile": 0.75,
   "threat_progress_min": 0.0,
   "residual_thresholds": {
-    "short": 0.14368351158050324,
-    "long": 0.2311643257284054
+    "short": 0.14109456785653304,
+    "long": 0.22078886636739922
   },
   "residual_threshold_labels": {
-    "\u226430 m": 0.14368351158050324,
-    ">30 m": 0.2311643257284054
+    "\u226430 m": 0.14109456785653304,
+    ">30 m": 0.22078886636739922
   },
   "xp_thresholds": {
-    "short": 0.4439087937332059,
-    "long": 0.8357818437500397
+    "short": 0.4799191237119341,
+    "long": 0.8428220898978245
   },
   "xp_threshold_labels": {
-    "\u226430 m": 0.4439087937332059,
-    ">30 m": 0.8357818437500397
+    "\u226430 m": 0.4799191237119341,
+    ">30 m": 0.8428220898978245
   },
   "progress_floor_mult": 0.3,
   "progress_logistic_k": 2.2,
@@ -38,6 +38,6 @@
   "ridge_target": "xp_hier_od",
   "expected_formula": "ridge_spatial * xp_progress_mult * xp_accessibility_mult",
   "accessibility_model": "locality_pressure_v1",
-  "training_passes": 1364700,
-  "training_matches": 1858
+  "training_passes": 1077127,
+  "training_matches": 1654
 }

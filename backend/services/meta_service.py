@@ -75,7 +75,7 @@ def build_meta_payload(position_family: str) -> dict[str, Any]:
         "nationalities": list(cached_nationalities()),
         "filter_options": filter_options_meta(family),
         "description": (
-            f"Premier League, Serie A, La Liga, Bundesliga and Ligue 1 {family_label.lower()} — "
+            f"Belgian Pro League, Croatia, Eredivisie, Greece, Portugal and Turkey {family_label.lower()} — "
             "pass ratings (xT v4), progression ratings, and xP analytics. "
             "All scores and ranks are computed within the selected position pool."
         ),

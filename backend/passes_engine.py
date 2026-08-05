@@ -56,13 +56,14 @@ except ImportError:
 SEASON_ALL_CSV_PATH = Path(__file__).resolve().parent / "season_all.csv"
 SEASON_ALL_BR_CSV_PATH = Path(__file__).resolve().parent / "season_all_br.csv"
 SEASON_ALL_BR_FULL_CSV_PATH = Path(__file__).resolve().parent / "season_all_brfull.csv"
-SEASON_ALL_PL_CSV_PATH = Path(__file__).resolve().parent / "season_all_PL.csv"
-SEASON_ALL_ITALIA_SERIEA_CSV_PATH = Path(__file__).resolve().parent / "season_all_italiaseriea.csv"
-SEASON_ALL_LALIGA_CSV_PATH = Path(__file__).resolve().parent / "season_all_laligapasses.csv"
-SEASON_ALL_BUNDESLIGA_CSV_PATH = Path(__file__).resolve().parent / "bundesliga_passes.csv"
-SEASON_ALL_LIGUE1_CSV_PATH = Path(__file__).resolve().parent / "ligue1_passes.csv"
+BELGIAN_PASSES_CSV_PATH = Path(__file__).resolve().parent / "belgian_passes.csv"
+CROATA_PASSES_CSV_PATH = Path(__file__).resolve().parent / "croata_passes.csv"
+EREDIVISE_PASSES_CSV_PATH = Path(__file__).resolve().parent / "eredivise_passes.csv"
+GREEK_PASSES_CSV_PATH = Path(__file__).resolve().parent / "greek_passes.csv"
+PORTUGAL_PASSES_CSV_PATH = Path(__file__).resolve().parent / "portugal_passes.csv"
+TURKEY_PASSES_CSV_PATH = Path(__file__).resolve().parent / "turkey_passes.csv"
 PLAYER_MATCH_STATS_PATH = Path(__file__).resolve().parent / "player_match_stats.csv"
-DATA_CACHE_VERSION = 68
+DATA_CACHE_VERSION = 69
 
 MIN_MINUTES_PCT = 0.30
 RATING_MIN_MINUTES_PCT = 0.30
@@ -786,64 +787,74 @@ def _load_br_pass_frame() -> pd.DataFrame:
     return frame
 
 
-def _load_pl_pass_frame() -> pd.DataFrame:
-    if not SEASON_ALL_PL_CSV_PATH.exists():
+def _load_belgian_pass_frame() -> pd.DataFrame:
+    if not BELGIAN_PASSES_CSV_PATH.exists():
         return pd.DataFrame()
-    frame = pd.read_csv(SEASON_ALL_PL_CSV_PATH, low_memory=False)
+    frame = pd.read_csv(BELGIAN_PASSES_CSV_PATH, low_memory=False)
     frame = frame[frame["category"].astype(str).str.lower() == "passes"]
     return resolve_positions_in_csv_frame(frame)
 
 
-def _load_italia_seriea_pass_frame() -> pd.DataFrame:
-    if not SEASON_ALL_ITALIA_SERIEA_CSV_PATH.exists():
+def _load_croata_pass_frame() -> pd.DataFrame:
+    if not CROATA_PASSES_CSV_PATH.exists():
         return pd.DataFrame()
-    frame = pd.read_csv(SEASON_ALL_ITALIA_SERIEA_CSV_PATH, low_memory=False)
+    frame = pd.read_csv(CROATA_PASSES_CSV_PATH, low_memory=False)
     frame = frame[frame["category"].astype(str).str.lower() == "passes"]
     return resolve_positions_in_csv_frame(frame)
 
 
-def _load_laliga_pass_frame() -> pd.DataFrame:
-    if not SEASON_ALL_LALIGA_CSV_PATH.exists():
+def _load_eredivise_pass_frame() -> pd.DataFrame:
+    if not EREDIVISE_PASSES_CSV_PATH.exists():
         return pd.DataFrame()
-    frame = pd.read_csv(SEASON_ALL_LALIGA_CSV_PATH, low_memory=False)
+    frame = pd.read_csv(EREDIVISE_PASSES_CSV_PATH, low_memory=False)
     frame = frame[frame["category"].astype(str).str.lower() == "passes"]
     return resolve_positions_in_csv_frame(frame)
 
 
-def _load_bundesliga_pass_frame() -> pd.DataFrame:
-    if not SEASON_ALL_BUNDESLIGA_CSV_PATH.exists():
+def _load_greek_pass_frame() -> pd.DataFrame:
+    if not GREEK_PASSES_CSV_PATH.exists():
         return pd.DataFrame()
-    frame = pd.read_csv(SEASON_ALL_BUNDESLIGA_CSV_PATH, low_memory=False)
+    frame = pd.read_csv(GREEK_PASSES_CSV_PATH, low_memory=False)
     frame = frame[frame["category"].astype(str).str.lower() == "passes"]
     return resolve_positions_in_csv_frame(frame)
 
 
-def _load_ligue1_pass_frame() -> pd.DataFrame:
-    if not SEASON_ALL_LIGUE1_CSV_PATH.exists():
+def _load_portugal_pass_frame() -> pd.DataFrame:
+    if not PORTUGAL_PASSES_CSV_PATH.exists():
         return pd.DataFrame()
-    frame = pd.read_csv(SEASON_ALL_LIGUE1_CSV_PATH, low_memory=False)
+    frame = pd.read_csv(PORTUGAL_PASSES_CSV_PATH, low_memory=False)
+    frame = frame[frame["category"].astype(str).str.lower() == "passes"]
+    return resolve_positions_in_csv_frame(frame)
+
+
+def _load_turkey_pass_frame() -> pd.DataFrame:
+    if not TURKEY_PASSES_CSV_PATH.exists():
+        return pd.DataFrame()
+    frame = pd.read_csv(TURKEY_PASSES_CSV_PATH, low_memory=False)
     frame = frame[frame["category"].astype(str).str.lower() == "passes"]
     return resolve_positions_in_csv_frame(frame)
 
 
 EUROPEAN_LEAGUE_LABELS: dict[str, str] = {
-    "premier_league": "Premier League",
-    "italia_seriea": "Serie A",
-    "laliga": "La Liga",
-    "bundesliga": "Bundesliga",
-    "ligue1": "Ligue 1",
+    "belgian_pro_league": "Belgian Pro League",
+    "croatian_league": "Croatian League",
+    "eredivisie": "Eredivisie",
+    "greek_super_league": "Greek Super League",
+    "liga_portugal": "Liga Portugal",
+    "super_lig": "Süper Lig",
 }
 
 
 def _load_european_league_pass_frame() -> pd.DataFrame:
-    """Combined passes from PL, Serie A, La Liga, Bundesliga and Ligue 1."""
+    """Combined passes from Belgian Pro League, Croatia, Eredivisie, Greece, Portugal and Turkey."""
     frames: list[pd.DataFrame] = []
     for source, loader in (
-        ("premier_league", _load_pl_pass_frame),
-        ("italia_seriea", _load_italia_seriea_pass_frame),
-        ("laliga", _load_laliga_pass_frame),
-        ("bundesliga", _load_bundesliga_pass_frame),
-        ("ligue1", _load_ligue1_pass_frame),
+        ("belgian_pro_league", _load_belgian_pass_frame),
+        ("croatian_league", _load_croata_pass_frame),
+        ("eredivisie", _load_eredivise_pass_frame),
+        ("greek_super_league", _load_greek_pass_frame),
+        ("liga_portugal", _load_portugal_pass_frame),
+        ("super_lig", _load_turkey_pass_frame),
     ):
         frame = loader()
         if frame.empty:
@@ -1019,7 +1030,7 @@ def build_european_league_players(
     *,
     min_passes: int = 100,
 ) -> list[dict]:
-    """Player metrics from PL, Serie A, La Liga, Bundesliga and Ligue 1 for one family."""
+    """Player metrics from the six configured European leagues for one family."""
     players, _ = _european_league_enriched_bundle(
         cache_version,
         position_family,
@@ -1039,7 +1050,7 @@ def build_european_league_midfielders(
     *,
     min_passes: int = 100,
 ) -> list[dict]:
-    """Midfielder metrics from Premier League, Serie A, La Liga, Bundesliga and Ligue 1."""
+    """Midfielder metrics from Belgian Pro League, Croatia, Eredivisie, Greece, Portugal and Turkey."""
     return build_european_league_players(
         "midfielders",
         cache_version,

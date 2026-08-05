@@ -7,11 +7,12 @@ export { POSITION_FAMILIES, positionBlocksForFamily };
 export const DEFAULT_FILTER_OPTIONS: FilterOptionsMeta = {
   leagues: [
     { key: "all", label: "All leagues" },
-    { key: "premier_league", label: "Premier League" },
-    { key: "italia_seriea", label: "Serie A" },
-    { key: "laliga", label: "La Liga" },
-    { key: "bundesliga", label: "Bundesliga" },
-    { key: "ligue1", label: "Ligue 1" },
+    { key: "belgian_pro_league", label: "Belgian Pro League" },
+    { key: "croatian_league", label: "Croatian League" },
+    { key: "eredivisie", label: "Eredivisie" },
+    { key: "greek_super_league", label: "Greek Super League" },
+    { key: "liga_portugal", label: "Liga Portugal" },
+    { key: "super_lig", label: "Süper Lig" },
   ],
   foot: [
     { key: "all", label: "Todos" },

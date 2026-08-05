@@ -86,4 +86,10 @@ def build_pool_record(
             merged.update(source)
     merged["player_id"] = pid
     merged["position_family"] = position_family
+    for key in ("league", "league_source"):
+        for source in (rated, progression, xp):
+            value = source.get(key) if source else None
+            if value:
+                merged[key] = value
+                break
     return sanitize_for_json(merged)
