@@ -10,6 +10,9 @@ from typing import Any
 from position_families import DEFAULT_POSITION_FAMILY, normalize_position_family
 from services.serialization import sanitize_for_json
 
+import player_profiles as pp
+import transfermarkt_profiles as tm
+
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 POOL_CACHE_VERSION = 1
 
@@ -40,6 +43,23 @@ def clear_pool_cache() -> None:
     _load_pool_file.cache_clear()
 
 
+def enrich_player_profile_fields(player: dict[str, Any]) -> dict[str, Any]:
+    """Merge cached profile / Transfermarkt metadata into a pool player record."""
+    pid = str(player.get("player_id", ""))
+    if not pid:
+        return player
+    out = dict(player)
+    out["age"] = pp.read_cached_age(pid)
+    out["height"] = pp.read_cached_height_display(pid)
+    out["nationality"] = pp.read_cached_nationality(pid)
+    out["dominant_foot"] = pp.read_cached_dominant_foot(pid)
+    out["photo_url"] = pp.read_cached_photo_url(pid)
+    out["market_value"] = tm.read_cached_market_value(pid)
+    out["market_value_eur"] = tm.read_cached_market_value_eur(pid)
+    out["contract_until"] = pp.read_cached_contract_until(pid)
+    return out
+
+
 def get_pool_parts(position_family: str = DEFAULT_POSITION_FAMILY) -> dict[str, Any]:
     """Return pool dicts compatible with legacy _bundle_parts (no pass DataFrames)."""
     family = normalize_position_family(position_family)
@@ -53,7 +73,7 @@ def get_pool_parts(position_family: str = DEFAULT_POSITION_FAMILY) -> dict[str, 
     for raw in players:
         if not isinstance(raw, dict):
             continue
-        player = dict(raw)
+        player = enrich_player_profile_fields(dict(raw))
         pid = str(player.get("player_id", ""))
         if not pid:
             continue
