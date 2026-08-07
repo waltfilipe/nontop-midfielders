@@ -2762,6 +2762,34 @@ tr:last-child td { border-bottom: none; }
 .compare-bar-row { display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; font-weight: 700; }
 .compare-bar-row.compare-bar-winner span { color: var(--text); }
 .compare-bar-fill { height: 8px; border-radius: 4px; min-width: 4px; flex: 1; max-width: 60%; transition: width 0.35s ease; }
+.compare-pass-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; }
+.compare-pass-cell {
+  padding: 0.65rem;
+  border-radius: var(--radius-sm);
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid var(--border-subtle);
+  transition: border-color 0.15s;
+}
+
+.compare-pass-cell:hover {
+  border-color: rgba(147, 197, 253, 0.2);
+}
+
+.compare-letters { display: flex; justify-content: space-between; margin-top: 0.5rem; gap: 0.5rem; }
+.compare-grade-side {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  opacity: 0.75;
+  transition: opacity 0.15s;
+}
+
+.compare-grade-side.compare-grade-winner {
+  opacity: 1;
+}
+
+.grade-a-score { font-weight: 700; font-size: 0.82rem; }
+.grade-b-score { font-weight: 700; font-size: 0.82rem; }
 
 /* ── Maps / Scatter ── */
 .scatter-wrap {

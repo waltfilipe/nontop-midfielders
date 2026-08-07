@@ -136,10 +136,7 @@ export function ProfileView({
             <div className="player-card xp-profile-card">
               <h3 className="section-label">xP Profile</h3>
               <XpProfileBars bars={data.xp_bars} />
-              <XpIndicesPanel
-                indices={data.xp_indices ?? []}
-                roundGrades={data.xp_round_grades ?? []}
-              />
+              <XpIndicesPanel indices={data.xp_indices ?? []} />
               <PassLengthMix data={data} />
             </div>
           </div>

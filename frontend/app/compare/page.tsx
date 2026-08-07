@@ -122,9 +122,6 @@ function CompareContent() {
     syncUrl(playerA, playerB);
   }, [playerA, playerB, syncUrl]);
 
-  const nameA = compareData ? String(compareData.player_a.player_name ?? "Jogador A") : "Jogador A";
-  const nameB = compareData ? String(compareData.player_b.player_name ?? "Jogador B") : "Jogador B";
-
   const compareSelectOptions = useMemo(() => {
     const seen = new Set<string>();
     const merged: PlayerOption[] = [];
@@ -207,13 +204,8 @@ function CompareContent() {
             player={compareData.player_a}
             heatmap={compareData.heatmap_a_b64}
           />
-          <div className="player-card compare-charts-card">
-            <CompareCenter
-              pillars={compareData.pillars}
-              passGrid={compareData.pass_grid}
-              nameA={nameA}
-              nameB={nameB}
-            />
+          <div className="player-card" style={{ padding: "1rem" }}>
+            <CompareCenter pillars={compareData.pillars} passGrid={compareData.pass_grid} />
           </div>
           <ComparePlayerCard
             side="b"
