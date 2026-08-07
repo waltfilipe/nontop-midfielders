@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import sys
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
 
@@ -33,6 +34,7 @@ from services.maps_service import (  # noqa: E402
     get_round_options,
     load_aggregated_maps,
 )
+from services.prewarm import is_ready, prewarm_status, start_prewarm  # noqa: E402
 from services.profile_service import build_profile_payload  # noqa: E402
 from services.runtime_mode import heavy_maps_enabled, pass_scout_mode  # noqa: E402
 from services.serialization import sanitize_for_json  # noqa: E402
@@ -48,10 +50,19 @@ from services.similarity_service import (  # noqa: E402
 
 HEAVY_MAPS_ENABLED = heavy_maps_enabled()
 
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    if pass_scout_mode() == "local":
+        start_prewarm()
+    yield
+
+
 app = FastAPI(
     title="Pass Scout API",
     description="European outfield pass analysis — xT, xP, progression ratings",
     version="0.5.0",
+    lifespan=lifespan,
 )
 
 _cors_origins = os.getenv(
@@ -111,11 +122,14 @@ def _require_heavy_maps(feature: str) -> None:
 
 
 @app.get("/health")
-def health() -> dict[str, str]:
+def health() -> dict[str, Any]:
+    warm = prewarm_status()
     return {
-        "status": "ok",
+        "status": "ok" if is_ready() or pass_scout_mode() != "local" else "warming",
+        "ready": is_ready(),
         "mode": pass_scout_mode(),
         "heavy_maps": str(HEAVY_MAPS_ENABLED).lower(),
+        "prewarm": warm,
     }
 
 

@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
     ],
   },
   // Allow Cursor cloud preview origin in dev
-  allowedDevOrigins: ["*.agent.cvm.dev", "*.cvm.dev"],
+  allowedDevOrigins: ["*.agent.cvm.dev", "*.cvm.dev", "*.trycloudflare.com"],
   async rewrites() {
     return [
       {

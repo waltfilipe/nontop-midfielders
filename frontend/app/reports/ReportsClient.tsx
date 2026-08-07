@@ -30,7 +30,7 @@ type PrintReportEntry = {
   mapSlots: ReportMapSlot[];
 };
 
-const PROFILE_CONCURRENCY = 4;
+const PROFILE_CONCURRENCY = 2;
 
 async function mapPool<T, R>(
   items: T[],

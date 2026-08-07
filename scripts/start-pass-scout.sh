@@ -78,6 +78,11 @@ if [[ "${1:-}" == "daemon" ]]; then
   curl -fsS http://127.0.0.1:8000/health >/dev/null || {
     echo "Backend failed. Log:"; tail -20 "$BACKEND_LOG"; exit 1
   }
+  echo "    Waiting for analytics prewarm…"
+  for _ in $(seq 1 300); do
+    if curl -fsS http://127.0.0.1:8000/health 2>/dev/null | grep -q '"ready": true'; then break; fi
+    sleep 2
+  done
   echo "==> Starting frontend (daemon)…"
   (
     cd "$ROOT/frontend"
@@ -120,6 +125,13 @@ curl -fsS http://127.0.0.1:8000/health || {
   tail -20 "$BACKEND_LOG"
   exit 1
 }
+echo "    Waiting for analytics prewarm…"
+for _ in $(seq 1 300); do
+  if curl -fsS http://127.0.0.1:8000/health 2>/dev/null | grep -q '"ready": true'; then
+    break
+  fi
+  sleep 2
+done
 
 echo "==> Starting frontend…"
 (
