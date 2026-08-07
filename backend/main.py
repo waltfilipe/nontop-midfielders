@@ -36,6 +36,15 @@ from services.maps_service import (  # noqa: E402
 from services.profile_service import build_profile_payload  # noqa: E402
 from services.runtime_mode import heavy_maps_enabled, pass_scout_mode  # noqa: E402
 from services.serialization import sanitize_for_json  # noqa: E402
+from services.similarity_service import (  # noqa: E402
+    POOL_ALL,
+    POOL_SATELLITE,
+    POOL_TOP5,
+    find_similar_players,
+    merged_compare_parts,
+    player_options_for_pool,
+    pool_counts,
+)
 
 HEAVY_MAPS_ENABLED = heavy_maps_enabled()
 
@@ -274,7 +283,7 @@ def compare_players(
     position_family: str = Query(DEFAULT_POSITION_FAMILY),
 ) -> dict[str, Any]:
     family = _resolve_position_family(position_family)
-    parts = _pool_parts(family)
+    parts = merged_compare_parts(_pool_parts(family))
     payload = build_compare_payload(
         player_a, player_b,
         players_by_id=parts["players_by_id"],
@@ -284,6 +293,70 @@ def compare_players(
     )
     if payload is None:
         raise HTTPException(status_code=404, detail="One or both players not found or missing xP data")
+    return sanitize_for_json(payload)
+
+
+@app.get("/api/similar/meta")
+def similar_meta() -> dict[str, Any]:
+    return sanitize_for_json({
+        "method": "seven_pillars",
+        "pools": [
+            {"key": POOL_SATELLITE, "label": "Ligas satélite (6)"},
+            {"key": POOL_TOP5, "label": "Top 5 europeias"},
+            {"key": POOL_ALL, "label": "Todas"},
+        ],
+        "pool_counts": pool_counts(),
+        "pillars": [
+            "Volume", "Efficiency", "Build-up", "Chance creation",
+            "Productivity", "Precision", "Lethality",
+        ],
+    })
+
+
+@app.get("/api/similar/options")
+def similar_options(
+    pool: str = Query(POOL_ALL),
+    limit: int = Query(500, ge=1, le=1000),
+) -> dict[str, Any]:
+    try:
+        options = player_options_for_pool(pool, limit=limit)
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    return sanitize_for_json({"pool": pool, "options": options})
+
+
+@app.get("/api/similar/{player_id}")
+def similar_players(
+    player_id: str,
+    candidate_pool: str = Query(POOL_SATELLITE),
+    reference_pool: str | None = Query(None),
+    top_k: int = Query(10, ge=1, le=30),
+    max_market_value_pct: float | None = Query(None, ge=0.05, le=1.0),
+) -> dict[str, Any]:
+    max_mv: float | None = None
+    payload = find_similar_players(
+        player_id,
+        candidate_pool=candidate_pool,
+        reference_pool=reference_pool,
+        top_k=top_k,
+    )
+    if payload is None:
+        raise HTTPException(status_code=404, detail="Reference player not found in similarity pools")
+
+    if max_market_value_pct is not None:
+        target_mv = payload["target"].get("market_value_eur")
+        if target_mv is not None and float(target_mv) > 0:
+            max_mv = float(target_mv) * float(max_market_value_pct)
+            payload = find_similar_players(
+                player_id,
+                candidate_pool=candidate_pool,
+                reference_pool=reference_pool,
+                top_k=top_k,
+                max_market_value_eur=max_mv,
+            )
+            if payload is None:
+                raise HTTPException(status_code=404, detail="Reference player not found")
+
     return sanitize_for_json(payload)
 
 

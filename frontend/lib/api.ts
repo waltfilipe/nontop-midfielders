@@ -204,6 +204,74 @@ export function getCompare(playerA: string, playerB: string, positionFamily = "m
   return fetchApi<ComparePayload>(`/api/compare?${qs}`);
 }
 
+export type SimilarPlayer = {
+  player_id: string;
+  player_name: string;
+  team: string;
+  league?: string;
+  league_source?: string;
+  similarity_pct: number;
+  distance?: number;
+  market_value_display?: string;
+  market_value_eur?: number | null;
+  xp_pass_rating?: number | null;
+  pillars?: Record<string, number>;
+  pillar_delta?: Record<string, number>;
+};
+
+export type SimilarPlayersPayload = {
+  target: {
+    player_id: string;
+    player_name: string;
+    team: string;
+    league?: string;
+    league_source?: string;
+    market_value_display?: string;
+    xp_pass_rating?: number | null;
+    pillars?: Record<string, number>;
+  };
+  method: string;
+  pillar_labels: string[];
+  candidate_pool: string;
+  similar: SimilarPlayer[];
+};
+
+export type SimilarMeta = {
+  method: string;
+  pools: { key: string; label: string }[];
+  pool_counts: Record<string, number>;
+  pillars: string[];
+};
+
+export function getSimilarMeta() {
+  return fetchApi<SimilarMeta>("/api/similar/meta");
+}
+
+export function getSimilarOptions(pool = "all", limit = 500) {
+  const qs = new URLSearchParams({ pool, limit: String(limit) });
+  return fetchApi<{ pool: string; options: PlayerOption[] }>(`/api/similar/options?${qs}`);
+}
+
+export function getSimilarPlayers(
+  playerId: string,
+  params?: {
+    candidate_pool?: string;
+    reference_pool?: string;
+    top_k?: number;
+    max_market_value_pct?: number;
+  },
+) {
+  const qs = new URLSearchParams();
+  if (params?.candidate_pool) qs.set("candidate_pool", params.candidate_pool);
+  if (params?.reference_pool) qs.set("reference_pool", params.reference_pool);
+  if (params?.top_k) qs.set("top_k", String(params.top_k));
+  if (params?.max_market_value_pct != null) {
+    qs.set("max_market_value_pct", String(params.max_market_value_pct));
+  }
+  const q = qs.toString();
+  return fetchApi<SimilarPlayersPayload>(`/api/similar/${playerId}${q ? `?${q}` : ""}`);
+}
+
 export function getScatter(x: string, y: string, highlight?: string, positionFamily = "midfielders") {
   const qs = new URLSearchParams({ x, y, position_family: positionFamily });
   if (highlight) qs.set("highlight", highlight);
