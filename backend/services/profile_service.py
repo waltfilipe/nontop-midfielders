@@ -22,6 +22,11 @@ XP_PROFILE_BAR_LABELS = {
     "xp_efficiency_display": "Precision",
     "xp_edge_display": "Lethality",
 }
+XP_PROFILE_BAR_INDEX_KEYS = {
+    "xp_activity_display": "xp_activity_index",
+    "xp_efficiency_display": "xp_efficiency_index",
+    "xp_edge_display": "xp_edge_index",
+}
 
 
 def build_pass_score_sections(xp_profile: dict) -> list[dict[str, Any]]:
@@ -50,12 +55,13 @@ def build_pass_score_sections(xp_profile: dict) -> list[dict[str, Any]]:
 def build_xp_profile_bars(xp_profile: dict) -> list[dict[str, Any]]:
     bars: list[dict[str, Any]] = []
     for key in XP_PROFILE_BAR_KEYS:
+        index_key = XP_PROFILE_BAR_INDEX_KEYS.get(key, key)
         bars.append({
             "key": key,
             "label": XP_PROFILE_BAR_LABELS.get(key, key),
             "value": xp_profile.get(key),
-            "rank": xp_profile.get(f"{key}_rank_in_group"),
-            "rank_pool": xp_profile.get(f"{key}_rank_pool_in_group"),
+            "rank": xp_profile.get(f"{key}_rank_in_group") or xp_profile.get(f"{index_key}_rank_in_group"),
+            "rank_pool": xp_profile.get(f"{key}_rank_pool_in_group") or xp_profile.get(f"{index_key}_rank_pool_in_group"),
         })
     return bars
 

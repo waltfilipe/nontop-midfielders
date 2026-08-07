@@ -26,7 +26,11 @@ export function XpHeatBar({ value }: Props) {
         {value != null && (
           <span
             className="xp-heat-bar-marker metric-gradient-bar-marker"
-            style={{ left: `${pos}%` }}
+            style={{
+              left: `${pos}%`,
+              background: endColor,
+              boxShadow: `0 0 10px ${endColor}55`,
+            }}
           />
         )}
       </div>
