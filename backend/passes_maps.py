@@ -1,0 +1,1252 @@
+"""Impact pass maps (StatsBomb pitch layout)."""
+
+from __future__ import annotations
+
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.colors import LinearSegmentedColormap, Normalize, PowerNorm
+from matplotlib.lines import Line2D
+from matplotlib.patches import FancyArrowPatch, Rectangle
+from mplsoccer import Pitch, VerticalPitch
+
+from passes_engine import filter_live_ball_passes
+
+FIG_W, FIG_H = 7.2, 4.8
+FIG_DPI = 220
+FIG_W_COMPACT, FIG_H_COMPACT = 6.8, 4.5
+FIG_DPI_COMPACT = 280
+FIG_W_MINI, FIG_H_MINI = 5.2, 3.45
+FIG_DPI_MINI = 200
+FIG_W_DASHBOARD, FIG_H_DASHBOARD = 4.6, 3.05
+FIG_W_DASHBOARD_LG, FIG_H_DASHBOARD_LG = 5.5, 3.55
+FIG_DPI_DASHBOARD = 260
+MAP_REF_WIDTH = 7.2
+FIELD_X, FIELD_Y = 120.0, 80.0
+PASS_DEST_HEATMAP_COLS = 12
+PASS_DEST_HEATMAP_ROWS = 8
+ARROW_WIDTH = 0.75
+ARROW_HEADWIDTH = 1.15
+ARROW_HEADLENGTH = 1.15
+ARROW_ALPHA_EMPH = 0.82
+PASS_START_MARKER_SIZE = 7
+
+COLOR_PROGRESSIVE = "#22c55e"
+COLOR_HIGHLY_PROGRESSIVE = "#4ade80"
+CMAP_PASS_DEST = LinearSegmentedColormap.from_list(
+    "pass_dest", ["#1a1a2e", "#1e3a8a", "#3b82f6", "#fbbf24", "#ef4444"]
+)
+CMAP_REPORT_PROGRESSIVE = LinearSegmentedColormap.from_list(
+    "report_prog",
+    ["#14101c", "#450a0a", "#991b1b", "#ea580c", "#fbbf24", "#fff7ed"],
+)
+CMAP_REPORT_XPV_RED = LinearSegmentedColormap.from_list(
+    "report_xpv_red",
+    ["#3f0d12", "#7f1d1d", "#b91c1c", "#ef4444", "#f87171", "#fecaca"],
+)
+CMAP_XT_GRID = LinearSegmentedColormap.from_list(
+    "xt_grid", ["#1a1a2e", "#3b82f6", "#fbbf24", "#ef4444"]
+)
+XT_HEATMAP_COLS_DEFAULT = 16
+XT_HEATMAP_ROWS_DEFAULT = 12
+XT_MAP_FIG_W, XT_MAP_FIG_H = 7.8, 5.2
+XT_MAP_FIG_DPI = 160
+XT_MAP_REF_WIDTH = 7.8
+XT_MAP_COLOR_PERCENTILE = (5.0, 95.0)
+
+# Profile origin heatmap — footer band for direction-of-attack chrome.
+# `pad_bottom` (StatsBomb data units) reserves real space *below* the visible
+# pitch (data y = FIELD_Y). mplsoccer manages the pitch aspect itself and ignores
+# figure-level margins (subplots_adjust), so the footer must be created inside the
+# axes via pitch padding and the chrome anchored to the actual rendered pitch edge.
+PROFILE_PITCH_PAD_BOTTOM = 15.0
+PROFILE_ATTACK_ARROW_COLOR = "#94a3b8"
+PROFILE_ATTACK_LABEL_COLOR = "#94a3b8"
+PROFILE_ATTACK_ARROW_SPAN_FIG = 0.050
+PROFILE_ATTACK_ARROW_Y_RATIO = 0.60
+PROFILE_ATTACK_LABEL_Y_RATIO = 0.26
+PROFILE_ATTACK_MUTATION = 10.5
+PROFILE_ATTACK_LW = 1.35
+PROFILE_ATTACK_LABEL_FONT = 6.6
+
+
+def _resolve_figsize(
+    *,
+    compact: bool = True,
+    dashboard: bool = False,
+    dashboard_large: bool = False,
+) -> tuple[tuple[float, float], int]:
+    if dashboard_large:
+        return (FIG_W_DASHBOARD_LG, FIG_H_DASHBOARD_LG), FIG_DPI_DASHBOARD
+    if dashboard:
+        return (FIG_W_DASHBOARD, FIG_H_DASHBOARD), FIG_DPI_DASHBOARD
+    if compact:
+        return (FIG_W_COMPACT, FIG_H_COMPACT), FIG_DPI_COMPACT
+    return (FIG_W, FIG_H), FIG_DPI
+
+
+def _map_scale(fig_w: float) -> float:
+    return fig_w / MAP_REF_WIDTH
+
+
+def _base_pitch(
+    *,
+    figsize: tuple[float, float],
+    dpi: int,
+    bg: str = "#1a1a2e",
+    pad_bottom: float | None = None,
+):
+    pitch_kwargs = dict(
+        pitch_type="statsbomb", pitch_color=bg, line_color="#ffffff", line_alpha=0.95
+    )
+    if pad_bottom is not None:
+        pitch_kwargs["pad_bottom"] = pad_bottom
+    pitch = Pitch(**pitch_kwargs)
+    fig, ax = pitch.draw(figsize=figsize)
+    fig.set_facecolor(bg)
+    fig.set_dpi(dpi)
+    return fig, ax, pitch
+
+
+def _add_map_legend(ax, handles: list, *, fig_w: float) -> None:
+    scale = _map_scale(fig_w)
+    leg = ax.legend(
+        handles=handles,
+        loc="upper left",
+        bbox_to_anchor=(0.01, 0.99),
+        frameon=True,
+        facecolor="#1a1a2e",
+        edgecolor="#444466",
+        fontsize=6.0 * scale,
+        labelspacing=0.35 * scale,
+        borderpad=0.45 * scale,
+        handlelength=1.9 * scale,
+    )
+    for text in leg.get_texts():
+        text.set_color("white")
+    leg.get_frame().set_alpha(0.90)
+
+
+def _attack_arrow(fig, *, fig_w: float, has_cbar: bool = False, dashboard: bool = False) -> None:
+    scale = fig_w / MAP_REF_WIDTH
+    ox = -0.04 if has_cbar else 0.0
+    y_arrow = 0.052 if dashboard else 0.045
+    y_label = 0.018 if dashboard else 0.012
+    fig.patches.append(
+        FancyArrowPatch(
+            (0.44 + ox, y_arrow),
+            (0.56 + ox, y_arrow),
+            transform=fig.transFigure,
+            arrowstyle="-|>",
+            mutation_scale=(8.5 if dashboard else 10.0) * scale,
+            linewidth=(1.2 if dashboard else 1.4) * scale,
+            color="#aaaaaa",
+        )
+    )
+    fig.text(
+        0.50 + ox,
+        y_label,
+        "Direction of Attack",
+        ha="center",
+        va="bottom",
+        transform=fig.transFigure,
+        fontsize=(6.2 if dashboard else 7.0) * scale,
+        color="#aaaaaa",
+    )
+
+
+def _profile_attack_arrow(fig, ax) -> None:
+    """Centered direction-of-attack arrow in the footer band below the pitch.
+
+    The footer band is the padding reserved below the visible pitch via
+    ``pad_bottom``. We anchor the chrome to the *actual* rendered pitch edge
+    (data y = FIELD_Y projected to figure fraction) so it can never overlap the
+    heatmap regardless of how mplsoccer resolves the pitch aspect ratio.
+    """
+    fig.canvas.draw()
+    trans = ax.transData + fig.transFigure.inverted()
+    # StatsBomb pitches draw y inverted, so data y = FIELD_Y is the visible bottom.
+    center_x = float(trans.transform((FIELD_X * 0.5, FIELD_Y))[0])
+    bottom_frac = float(trans.transform((FIELD_X * 0.5, FIELD_Y))[1])
+    left_frac = float(trans.transform((0.0, FIELD_Y))[0])
+    right_frac = float(trans.transform((FIELD_X, FIELD_Y))[0])
+    pitch_width_frac = abs(right_frac - left_frac)
+
+    half_span = PROFILE_ATTACK_ARROW_SPAN_FIG * min(pitch_width_frac / 0.92, 1.08)
+    arrow_y = bottom_frac * PROFILE_ATTACK_ARROW_Y_RATIO
+    label_y = bottom_frac * PROFILE_ATTACK_LABEL_Y_RATIO
+
+    fig.patches.append(
+        FancyArrowPatch(
+            (center_x - half_span, arrow_y),
+            (center_x + half_span, arrow_y),
+            transform=fig.transFigure,
+            arrowstyle="-|>",
+            mutation_scale=PROFILE_ATTACK_MUTATION,
+            linewidth=PROFILE_ATTACK_LW,
+            color=PROFILE_ATTACK_ARROW_COLOR,
+            alpha=0.95,
+            clip_on=False,
+            zorder=6,
+        )
+    )
+    fig.text(
+        center_x,
+        label_y,
+        "Direction of Attack",
+        ha="center",
+        va="center",
+        transform=fig.transFigure,
+        fontsize=PROFILE_ATTACK_LABEL_FONT,
+        color=PROFILE_ATTACK_LABEL_COLOR,
+        alpha=0.98,
+        fontweight=500,
+        zorder=6,
+    )
+
+
+def _fit_dashboard_pass_axes(fig, ax) -> None:
+    """Normalize pitch footprint for the 2×2 dashboard grid."""
+    ax.set_position([0.07, 0.11, 0.86, 0.76])
+
+
+def _finalize_dashboard_map(fig, ax, *, fig_w: float) -> None:
+    _fit_dashboard_pass_axes(fig, ax)
+    _attack_arrow(fig, fig_w=fig_w, dashboard=True)
+
+
+def _delicate_arrows(pitch, ax, x1, y1, x2, y2, color, scale: float, *, alpha: float) -> None:
+    pitch.arrows(
+        x1, y1, x2, y2,
+        color=color,
+        width=ARROW_WIDTH * scale,
+        headwidth=ARROW_HEADWIDTH * scale,
+        headlength=ARROW_HEADLENGTH * scale,
+        ax=ax,
+        zorder=3,
+        alpha=alpha,
+    )
+
+
+DASHBOARD_TITLE_COMPLETED = "Completed passes\nBall circulation"
+DASHBOARD_TITLE_DEST_COMPLETED = "Completed destinations\nWhere passes arrive"
+DASHBOARD_TITLE_IMPACT = f"I.P.\nMeaningful xT change"
+DASHBOARD_TITLE_DEST_IMPACT = "I.P. destinations\nPenetration zones"
+COLOR_ALL_PASSES = "#64748b"
+COLOR_ALL_PASSES_END = "#94a3b8"
+ALL_PASS_ARROW_ALPHA = 0.22
+ALL_PASS_MARKER_SIZE = 4
+
+
+def draw_all_completed_passes_map(
+    passes,
+    player_name: str,
+    match_label: str = "all matches",
+    *,
+    compact: bool = True,
+    dashboard: bool = False,
+    dashboard_large: bool = False,
+):
+    """Every completed pass drawn on the pitch (origin marker + faint arrow)."""
+    figsize, dpi = _resolve_figsize(
+        compact=compact, dashboard=dashboard, dashboard_large=dashboard_large,
+    )
+
+    fig_w = figsize[0]
+    scale = _map_scale(fig_w)
+    fig, ax, pitch = _base_pitch(figsize=figsize, dpi=dpi)
+
+    if passes is None or passes.empty:
+        subset = passes
+    else:
+        subset = passes[passes["is_won"].astype(bool)].copy()
+        if "has_end" in subset.columns:
+            with_end = subset[subset["has_end"].astype(bool)]
+            without_end = subset[~subset["has_end"].astype(bool)]
+        else:
+            with_end = subset
+            without_end = subset.iloc[0:0]
+
+    if subset is None or subset.empty:
+        ax.text(60, 40, "No completed passes", ha="center", va="center", color="white", fontsize=9)
+    else:
+        if not with_end.empty:
+            for row in with_end.itertuples(index=False):
+                _delicate_arrows(
+                    pitch, ax,
+                    row.x_start, row.y_start, row.x_end, row.y_end,
+                    COLOR_ALL_PASSES, scale, alpha=ALL_PASS_ARROW_ALPHA,
+                )
+        starts_x = subset["x_start"].to_numpy(dtype=float)
+        starts_y = subset["y_start"].to_numpy(dtype=float)
+        pitch.scatter(
+            starts_x, starts_y,
+            s=ALL_PASS_MARKER_SIZE,
+            marker="o",
+            color=COLOR_ALL_PASSES_END,
+            edgecolors="white",
+            linewidths=0.15,
+            ax=ax,
+            zorder=5,
+            alpha=0.55,
+        )
+
+    legend_handles = [
+        Line2D([0], [0], color=COLOR_ALL_PASSES, lw=1.2 * scale, label="Completed pass", alpha=0.45),
+        Line2D(
+            [0], [0], marker="o", color="w", markerfacecolor=COLOR_ALL_PASSES_END,
+            markersize=4, linestyle="None", label="Origin",
+        ),
+    ]
+    _add_map_legend(ax, legend_handles, fig_w=fig_w)
+    ax.set_title(
+        DASHBOARD_TITLE_COMPLETED if dashboard else f"{player_name}\nCompleted passes · {match_label}",
+        color="white", fontsize=7.6 * scale if dashboard else 8.4 * scale, pad=4 if dashboard else 5,
+    )
+    if dashboard:
+        _finalize_dashboard_map(fig, ax, fig_w=fig_w)
+    elif not dashboard_large:
+        _attack_arrow(fig, fig_w=fig_w)
+    return fig
+
+
+def draw_impact_pass_map(
+    passes,
+    player_name: str,
+    match_label: str = "all matches",
+    *,
+    compact: bool = True,
+    dashboard: bool = False,
+    dashboard_large: bool = False,
+):
+    """Impact passes only — same visual language as the legacy pass map."""
+    figsize, dpi = _resolve_figsize(
+        compact=compact, dashboard=dashboard, dashboard_large=dashboard_large,
+    )
+
+    fig_w = figsize[0]
+    scale = _map_scale(fig_w)
+    subset = passes[passes["impact_success"] & passes["has_end"]].copy()
+    fig, ax, pitch = _base_pitch(figsize=figsize, dpi=dpi)
+
+    if subset.empty:
+        ax.text(60, 40, "No I.P.", ha="center", va="center", color="white", fontsize=9)
+    else:
+        for row in subset.itertuples(index=False):
+            is_high = bool(row.high_impact_success)
+            color, alpha = (
+                (COLOR_HIGHLY_PROGRESSIVE, ARROW_ALPHA_EMPH)
+                if is_high
+                else (COLOR_PROGRESSIVE, ARROW_ALPHA_EMPH)
+            )
+            _delicate_arrows(
+                pitch, ax,
+                row.x_start, row.y_start, row.x_end, row.y_end,
+                color, scale, alpha=alpha,
+            )
+            pitch.scatter(
+                row.x_start, row.y_start,
+                s=PASS_START_MARKER_SIZE, marker="o", color=color,
+                edgecolors="white", linewidths=0.3, ax=ax, zorder=6, alpha=alpha,
+            )
+
+    legend_handles = [
+        Line2D([0], [0], color=COLOR_PROGRESSIVE, lw=1.4 * scale, label="Impact", alpha=0.80),
+        Line2D([0], [0], color=COLOR_HIGHLY_PROGRESSIVE, lw=1.4 * scale, label="High Impact", alpha=0.85),
+        Line2D([0], [0], marker="o", color="w", markerfacecolor=COLOR_PROGRESSIVE,
+               markersize=4, linestyle="None", label="Pass origin"),
+    ]
+    _add_map_legend(ax, legend_handles, fig_w=fig_w)
+    ax.set_title(
+        DASHBOARD_TITLE_IMPACT if dashboard else f"{player_name}\nPasses Impact · {match_label}",
+        color="white", fontsize=7.6 * scale if dashboard else 8.4 * scale, pad=4 if dashboard else 5,
+    )
+    if dashboard:
+        _finalize_dashboard_map(fig, ax, fig_w=fig_w)
+    elif not dashboard_large:
+        _attack_arrow(fig, fig_w=fig_w)
+    return fig
+
+
+def draw_pass_destination_heatmap(
+    passes,
+    player_name: str,
+    match_label: str = "all matches",
+    *,
+    impact_only: bool = True,
+    compact: bool = True,
+    dashboard: bool = False,
+    dashboard_large: bool = False,
+):
+    """12×8 heatmap of pass end locations (impact or all completed)."""
+    figsize, dpi = _resolve_figsize(
+        compact=compact, dashboard=dashboard, dashboard_large=dashboard_large,
+    )
+
+    fig_w = figsize[0]
+    scale = _map_scale(fig_w)
+    if passes is None or passes.empty:
+        completed = passes
+    elif impact_only:
+        completed = passes[passes["impact_success"] & passes["has_end"]].copy()
+    else:
+        completed = passes[passes["is_won"].astype(bool) & passes["has_end"].astype(bool)].copy()
+    fig, ax, pitch = _base_pitch(figsize=figsize, dpi=dpi)
+
+    x_bins = np.linspace(0.0, FIELD_X, PASS_DEST_HEATMAP_COLS + 1)
+    y_bins = np.linspace(0.0, FIELD_Y, PASS_DEST_HEATMAP_ROWS + 1)
+    grid = np.zeros((PASS_DEST_HEATMAP_ROWS, PASS_DEST_HEATMAP_COLS), dtype=float)
+
+    if completed is not None and not completed.empty:
+        x_idx = np.clip(
+            np.digitize(completed["x_end"].to_numpy(), x_bins, right=True) - 1,
+            0,
+            PASS_DEST_HEATMAP_COLS - 1,
+        )
+        y_idx = np.clip(
+            np.digitize(completed["y_end"].to_numpy(), y_bins, right=True) - 1,
+            0,
+            PASS_DEST_HEATMAP_ROWS - 1,
+        )
+        for ix, iy in zip(x_idx, y_idx):
+            grid[iy, ix] += 1.0
+
+    vmax = max(float(grid.max()), 1.0)
+    norm = Normalize(vmin=0.0, vmax=vmax)
+
+    for iy in range(PASS_DEST_HEATMAP_ROWS):
+        for ix in range(PASS_DEST_HEATMAP_COLS):
+            value = float(grid[iy, ix])
+            x0, x1 = x_bins[ix], x_bins[ix + 1]
+            y0, y1 = y_bins[iy], y_bins[iy + 1]
+            ax.add_patch(
+                Rectangle(
+                    (x0, y0), x1 - x0, y1 - y0,
+                    facecolor=CMAP_PASS_DEST(norm(value)),
+                    edgecolor=(1, 1, 1, 0.12),
+                    linewidth=0.25,
+                    alpha=0.94,
+                    zorder=2,
+                )
+            )
+
+    pitch.draw(ax=ax)
+    if dashboard:
+        title = DASHBOARD_TITLE_DEST_IMPACT if impact_only else DASHBOARD_TITLE_DEST_COMPLETED
+        ax.set_title(title, color="white", fontsize=7.6 * scale, pad=4)
+        _finalize_dashboard_map(fig, ax, fig_w=fig_w)
+    elif dashboard_large:
+        title = DASHBOARD_TITLE_DEST_IMPACT if impact_only else DASHBOARD_TITLE_DEST_COMPLETED
+        ax.set_title(title, color="white", fontsize=7.6 * scale, pad=4)
+        _attack_arrow(fig, fig_w=fig_w)
+    else:
+        dest_kind = "I.P." if impact_only else "completed passes"
+        ax.set_title(
+            f"{player_name}\nDestino — {dest_kind} · {PASS_DEST_HEATMAP_COLS}×{PASS_DEST_HEATMAP_ROWS} · {match_label}",
+            color="white", fontsize=8.2 * scale, pad=5,
+        )
+        _attack_arrow(fig, fig_w=fig_w)
+    return fig
+
+
+def draw_pass_origin_heatmap(
+    passes,
+    player_name: str,
+    match_label: str = "all matches",
+    *,
+    cols: int = 8,
+    rows: int = 6,
+    completed_only: bool = True,
+    mini: bool = False,
+    tiny: bool = False,
+    compare: bool = False,
+):
+    """Heatmap of pass start locations (origin)."""
+    cols = max(int(cols), 1)
+    rows = max(int(rows), 1)
+    if compare:
+        figsize = (5.4, 3.6)
+        dpi = 180
+    elif tiny:
+        figsize = (2.2, 1.45)
+        dpi = 120
+    elif mini:
+        figsize = (2.6, 1.7)
+        dpi = 130
+    else:
+        figsize = (FIG_W_COMPACT, FIG_H_COMPACT)
+        dpi = FIG_DPI_COMPACT
+
+    fig_w = figsize[0]
+    scale = _map_scale(fig_w)
+    work = passes
+    if passes is not None and completed_only and "is_won" in passes.columns:
+        work = passes[passes["is_won"].astype(bool)].copy()
+    fig, ax, pitch = _base_pitch(figsize=figsize, dpi=dpi)
+
+    x_bins = np.linspace(0.0, FIELD_X, cols + 1)
+    y_bins = np.linspace(0.0, FIELD_Y, rows + 1)
+    grid = np.zeros((rows, cols), dtype=float)
+
+    if work is not None and not work.empty:
+        x_idx = np.clip(
+            np.digitize(work["x_start"].to_numpy(), x_bins, right=True) - 1,
+            0,
+            cols - 1,
+        )
+        y_idx = np.clip(
+            np.digitize(work["y_start"].to_numpy(), y_bins, right=True) - 1,
+            0,
+            rows - 1,
+        )
+        for ix, iy in zip(x_idx, y_idx):
+            grid[iy, ix] += 1.0
+
+    vmax = max(float(grid.max()), 1.0)
+    norm = Normalize(vmin=0.0, vmax=vmax)
+
+    for iy in range(rows):
+        for ix in range(cols):
+            value = float(grid[iy, ix])
+            x0, x1 = x_bins[ix], x_bins[ix + 1]
+            y0, y1 = y_bins[iy], y_bins[iy + 1]
+            ax.add_patch(
+                Rectangle(
+                    (x0, y0), x1 - x0, y1 - y0,
+                    facecolor=CMAP_PASS_DEST(norm(value)),
+                    edgecolor=(1, 1, 1, 0.12),
+                    linewidth=0.25,
+                    alpha=0.94,
+                    zorder=2,
+                )
+            )
+
+    pitch.draw(ax=ax)
+    if compare:
+        title_size = 8.0 * scale
+        title_pad = 6
+    elif tiny:
+        title_size = 6.2 * scale
+        title_pad = 2
+    elif mini:
+        title_size = 7.0 * scale
+        title_pad = 4
+    else:
+        title_size = 8.2 * scale
+        title_pad = 5
+    short_name = player_name.split()[0] if tiny and player_name and not compare else player_name
+    pass_kind = "completed" if completed_only else "all"
+    if compare:
+        title = f"{player_name}\nOrigem · {pass_kind} · {cols}×{rows}"
+    elif tiny:
+        title = f"{short_name}\nOrigem · {pass_kind}"
+    else:
+        title = f"{player_name}\nOrigem · {pass_kind} · {cols}×{rows} · {match_label}"
+    ax.set_title(title, color="white", fontsize=title_size, pad=title_pad)
+    if not mini and not tiny and not compare:
+        _attack_arrow(fig, fig_w=fig_w)
+    return fig
+
+
+def draw_action_origin_heatmap(
+    passes,
+    carries=None,
+    player_name: str = "",
+    match_label: str = "all matches",
+    *,
+    cols: int = 8,
+    rows: int = 6,
+    completed_only: bool = True,
+    mini: bool = False,
+    tiny: bool = False,
+    compare: bool = False,
+):
+    """Heatmap of pass + carry start locations (origin)."""
+    cols = max(int(cols), 1)
+    rows = max(int(rows), 1)
+    if compare:
+        figsize = (5.4, 3.6)
+        dpi = 180
+    elif tiny:
+        figsize = (2.2, 1.45)
+        dpi = 120
+    elif mini:
+        figsize = (2.6, 1.7)
+        dpi = 130
+    else:
+        figsize = (FIG_W_COMPACT, FIG_H_COMPACT)
+        dpi = FIG_DPI_COMPACT
+
+    fig_w = figsize[0]
+    scale = _map_scale(fig_w)
+    fig, ax, pitch = _base_pitch(figsize=figsize, dpi=dpi)
+
+    x_bins = np.linspace(0.0, FIELD_X, cols + 1)
+    y_bins = np.linspace(0.0, FIELD_Y, rows + 1)
+    grid = np.zeros((rows, cols), dtype=float)
+
+    def _accumulate(frame, *, won_only: bool) -> None:
+        if frame is None or frame.empty:
+            return
+        work = filter_live_ball_passes(frame)
+        if work is None or work.empty:
+            return
+        if won_only and "is_won" in work.columns:
+            work = work[work["is_won"].astype(bool)]
+        if work.empty or "x_start" not in work.columns or "y_start" not in work.columns:
+            return
+        x_idx = np.clip(
+            np.digitize(work["x_start"].to_numpy(), x_bins, right=True) - 1,
+            0,
+            cols - 1,
+        )
+        y_idx = np.clip(
+            np.digitize(work["y_start"].to_numpy(), y_bins, right=True) - 1,
+            0,
+            rows - 1,
+        )
+        for ix, iy in zip(x_idx, y_idx):
+            grid[iy, ix] += 1.0
+
+    _accumulate(passes, won_only=completed_only)
+    if carries is not None and not carries.empty:
+        carry_work = carries
+        if "is_dribble" in carry_work.columns:
+            carry_work = carry_work[~carry_work["is_dribble"].astype(bool)]
+        if "has_end" in carry_work.columns:
+            carry_work = carry_work[carry_work["has_end"].astype(bool)]
+        _accumulate(carry_work, won_only=False)
+
+    vmax = max(float(grid.max()), 1.0)
+    norm = Normalize(vmin=0.0, vmax=vmax)
+
+    for iy in range(rows):
+        for ix in range(cols):
+            value = float(grid[iy, ix])
+            x0, x1 = x_bins[ix], x_bins[ix + 1]
+            y0, y1 = y_bins[iy], y_bins[iy + 1]
+            ax.add_patch(
+                Rectangle(
+                    (x0, y0), x1 - x0, y1 - y0,
+                    facecolor=CMAP_PASS_DEST(norm(value)),
+                    edgecolor=(1, 1, 1, 0.12),
+                    linewidth=0.25,
+                    alpha=0.94,
+                    zorder=2,
+                )
+            )
+
+    pitch.draw(ax=ax)
+    if compare:
+        title_size = 8.0 * scale
+        title_pad = 6
+    elif tiny:
+        title_size = 6.2 * scale
+        title_pad = 2
+    elif mini:
+        title_size = 7.0 * scale
+        title_pad = 4
+    else:
+        title_size = 8.2 * scale
+        title_pad = 5
+    short_name = player_name.split()[0] if tiny and player_name and not compare else player_name
+    action_kind = "passes + carries" if completed_only else "all actions"
+    if compare:
+        title = f"{player_name}\nOrigin · {action_kind} · {cols}×{rows}"
+    elif tiny:
+        title = f"{short_name}\nOrigin · {action_kind}"
+    else:
+        title = f"{player_name}\nOrigin · {action_kind} · {cols}×{rows} · {match_label}"
+    ax.set_title(title, color="white", fontsize=title_size, pad=title_pad)
+    if not mini and not tiny and not compare:
+        _attack_arrow(fig, fig_w=fig_w)
+    return fig
+
+
+def draw_action_origin_smooth_heatmap(
+    passes,
+    carries=None,
+    player_name: str = "",
+    *,
+    profile: bool = False,
+    completed_only: bool = True,
+    mini: bool = False,
+):
+    """Smooth origin density heatmap (SofaScore-style, no visible grid cells)."""
+    from scipy.ndimage import gaussian_filter
+
+    if profile:
+        figsize = (3.85, 2.85)
+        dpi = 220
+    elif mini:
+        figsize = (FIG_W_MINI, FIG_H_MINI)
+        dpi = FIG_DPI_MINI
+    else:
+        figsize = (FIG_W_COMPACT, FIG_H_COMPACT)
+        dpi = FIG_DPI_COMPACT
+
+    fig, ax, pitch = _base_pitch(
+        figsize=figsize,
+        dpi=dpi,
+        pad_bottom=PROFILE_PITCH_PAD_BOTTOM if profile else None,
+    )
+    grid_x = 96
+    grid_y = 64
+    x_bins = np.linspace(0.0, FIELD_X, grid_x + 1)
+    y_bins = np.linspace(0.0, FIELD_Y, grid_y + 1)
+    density = np.zeros((grid_y, grid_x), dtype=float)
+
+    def _accumulate(frame, *, won_only: bool) -> None:
+        nonlocal density
+        if frame is None or frame.empty:
+            return
+        work = filter_live_ball_passes(frame)
+        if work is None or work.empty:
+            return
+        if won_only and "is_won" in work.columns:
+            work = work[work["is_won"].astype(bool)]
+        if work.empty or "x_start" not in work.columns or "y_start" not in work.columns:
+            return
+        hist, _, _ = np.histogram2d(
+            work["y_start"].to_numpy(),
+            work["x_start"].to_numpy(),
+            bins=[y_bins, x_bins],
+        )
+        density += hist
+
+    _accumulate(passes, won_only=completed_only)
+    if carries is not None and not carries.empty:
+        carry_work = carries
+        if "is_dribble" in carry_work.columns:
+            carry_work = carry_work[~carry_work["is_dribble"].astype(bool)]
+        if "has_end" in carry_work.columns:
+            carry_work = carry_work[carry_work["has_end"].astype(bool)]
+        _accumulate(carry_work, won_only=False)
+
+    if density.max() > 0:
+        density = gaussian_filter(density, sigma=2.8)
+        density = density / max(float(density.max()), 1e-9)
+
+    pitch.draw(ax=ax)
+    if density.max() > 0:
+        ax.imshow(
+            density,
+            origin="lower",
+            extent=[0.0, FIELD_X, 0.0, FIELD_Y],
+            cmap=CMAP_PASS_DEST,
+            alpha=0.72,
+            aspect="auto",
+            zorder=1,
+            vmin=0.0,
+            vmax=1.0,
+            interpolation="bilinear",
+        )
+
+    if not profile:
+        title = f"{player_name}\nOrigin · passes + carries" if player_name else "Origin · passes + carries"
+        ax.set_title(title, color="white", fontsize=8.0, pad=5)
+    else:
+        ax.set_title("")
+        _profile_attack_arrow(fig, ax)
+    ax.set_axis_off()
+    return fig
+
+
+def draw_xt_surface_heatmap(
+    *,
+    cols: int = XT_HEATMAP_COLS_DEFAULT,
+    rows: int = XT_HEATMAP_ROWS_DEFAULT,
+    compact: bool = False,
+    xt_surface_mode: str = "atual",
+):
+    """16×12 xT grid — same layout and labels as wc-playeranalysis draw_xt_grid_map."""
+    import passes_engine as pe
+
+    cols = max(int(cols), 1)
+    rows = max(int(rows), 1)
+    if compact:
+        figsize = (FIG_W_COMPACT, FIG_H_COMPACT)
+        dpi = FIG_DPI_COMPACT
+        fig_w = figsize[0]
+        scale = _map_scale(fig_w)
+    else:
+        figsize = (XT_MAP_FIG_W, XT_MAP_FIG_H)
+        dpi = XT_MAP_FIG_DPI
+        fig_w = XT_MAP_FIG_W
+        scale = fig_w / XT_MAP_REF_WIDTH
+
+    meta = pe.get_xt_surface_meta(xt_surface_mode)
+    grid = pe.get_xt_quadrant_grid(cols, rows, xt_surface_mode=xt_surface_mode)
+    model_label = meta.get("model_label", "Heuristic v4 — Top 5 (final third)")
+
+    pitch = Pitch(pitch_type="statsbomb", pitch_color="#1a1a2e", line_color="#ffffff", line_alpha=0.95)
+    fig, ax = pitch.draw(figsize=figsize)
+    fig.set_facecolor("#1a1a2e")
+    fig.set_dpi(dpi)
+
+    x_bins = np.linspace(0.0, FIELD_X, cols + 1)
+    y_bins = np.linspace(0.0, FIELD_Y, rows + 1)
+
+    p_lo, p_hi = XT_MAP_COLOR_PERCENTILE
+    vmin_f = float(np.percentile(grid, p_lo))
+    vmax_f = float(np.percentile(grid, p_hi))
+    if vmax_f <= vmin_f:
+        vmax_f = vmin_f + 1e-6
+    norm = Normalize(vmin=vmin_f, vmax=vmax_f)
+    threshold = vmin_f + (vmax_f - vmin_f) * 0.45
+
+    for iy in range(rows):
+        for ix in range(cols):
+            value = float(grid[iy, ix])
+            x0, x1 = x_bins[ix], x_bins[ix + 1]
+            y0, y1 = y_bins[iy], y_bins[iy + 1]
+            ax.add_patch(
+                Rectangle(
+                    (x0, y0),
+                    x1 - x0,
+                    y1 - y0,
+                    facecolor=CMAP_XT_GRID(norm(value)),
+                    edgecolor=(1, 1, 1, 0.15),
+                    linewidth=0.4,
+                    alpha=0.95,
+                    zorder=2,
+                )
+            )
+            ax.text(
+                (x0 + x1) / 2.0,
+                (y0 + y1) / 2.0,
+                f"{value * 100:.1f}%",
+                ha="center",
+                va="center",
+                color="#000000" if value <= threshold else "#ffffff",
+                fontsize=5.2 * scale,
+                fontweight="600",
+                zorder=4,
+            )
+
+    pitch.draw(ax=ax)
+    ax.set_title(model_label, color="#eef1f7", fontsize=10 * scale, pad=8)
+
+    sm = plt.cm.ScalarMappable(cmap=CMAP_XT_GRID, norm=norm)
+    cbar = fig.colorbar(sm, ax=ax, fraction=0.022, pad=0.02, shrink=0.55)
+    cbar.ax.yaxis.set_tick_params(color="#ffffff", labelsize=6)
+    plt.setp(cbar.ax.axes.get_yticklabels(), color="#ffffff")
+    _attack_arrow(fig, fig_w=fig_w, has_cbar=True)
+    return fig
+
+# Report maps — large vertical progressive trio.
+REPORT_PORTRAIT_FIG_W = 6.12
+REPORT_PORTRAIT_FIG_H = 9.0
+REPORT_PORTRAIT_DPI = 320
+REPORT_PITCH_PAD_BOTTOM = 2.5
+REPORT_PROGRESSIVE_GRID_COLS = 36
+REPORT_PROGRESSIVE_GRID_ROWS = 54
+REPORT_PROGRESSIVE_CELL_GAP = 0.05
+REPORT_PROGRESSIVE_SMOOTH_SIGMA = 0.95
+REPORT_PROGRESSIVE_GAMMA = 0.72
+REPORT_IMPACT_ORIGIN_MARKER_SIZE = 12.0
+REPORT_IMPACT_DEST_MARKER_SIZE = 15.0
+REPORT_LINK_ZONE_COLS = 5
+REPORT_LINK_ZONE_ROWS = 5
+REPORT_LINK_TOP_N = 5
+REPORT_LINK_ARROW_COLOR = "#38bdf8"
+REPORT_LINK_ARROW_ALPHA = 0.82
+
+
+def _base_vertical_pitch(
+    *,
+    figsize: tuple[float, float],
+    dpi: int,
+    bg: str = "#1a1a2e",
+    pad_bottom: float | None = None,
+):
+    pitch_kwargs = dict(
+        pitch_type="statsbomb", pitch_color=bg, line_color="#ffffff", line_alpha=0.95
+    )
+    if pad_bottom is not None:
+        pitch_kwargs["pad_bottom"] = pad_bottom
+    pitch = VerticalPitch(**pitch_kwargs)
+    fig, ax = pitch.draw(figsize=figsize)
+    fig.set_facecolor(bg)
+    fig.set_dpi(dpi)
+    return fig, ax, pitch
+
+
+def _report_vertical_attack_arrow(fig, ax) -> None:
+    """Direction-of-attack arrow pointing upward below a vertical pitch."""
+    fig.canvas.draw()
+    trans = ax.transData + fig.transFigure.inverted()
+    center_x = float(trans.transform((FIELD_Y * 0.5, 0.0))[0])
+    bottom_frac = float(trans.transform((FIELD_Y * 0.5, 0.0))[1])
+    arrow_y0 = bottom_frac * 0.72
+    arrow_y1 = bottom_frac * 0.92
+    label_y = bottom_frac * 0.58
+
+    fig.patches.append(
+        FancyArrowPatch(
+            (center_x, arrow_y0),
+            (center_x, arrow_y1),
+            transform=fig.transFigure,
+            arrowstyle="-|>",
+            mutation_scale=PROFILE_ATTACK_MUTATION,
+            linewidth=PROFILE_ATTACK_LW,
+            color=PROFILE_ATTACK_ARROW_COLOR,
+            alpha=0.95,
+            clip_on=False,
+            zorder=6,
+        )
+    )
+    fig.text(
+        center_x,
+        label_y,
+        "Direction of Attack",
+        ha="center",
+        va="center",
+        transform=fig.transFigure,
+        fontsize=PROFILE_ATTACK_LABEL_FONT,
+        color=PROFILE_ATTACK_LABEL_COLOR,
+        alpha=0.98,
+        fontweight=500,
+        zorder=6,
+    )
+
+
+def _report_vertical_binned_grid_heatmap(
+    passes,
+    *,
+    x_col: str,
+    y_col: str,
+) -> plt.Figure:
+    """Dense portrait heatmap — fine grid cells with warm elegant palette."""
+    from scipy.ndimage import gaussian_filter
+
+    figsize = (REPORT_PORTRAIT_FIG_W, REPORT_PORTRAIT_FIG_H)
+    fig, ax, pitch = _base_vertical_pitch(
+        figsize=figsize,
+        dpi=REPORT_PORTRAIT_DPI,
+        pad_bottom=REPORT_PITCH_PAD_BOTTOM,
+    )
+
+    work = filter_live_ball_passes(passes)
+    if work is not None and not work.empty:
+        if "has_end" in work.columns and x_col.endswith("_end"):
+            work = work[work["has_end"].astype(bool)]
+
+    pitch.draw(ax=ax)
+    if work is not None and not work.empty and x_col in work.columns and y_col in work.columns:
+        x_bins = np.linspace(0.0, FIELD_X, REPORT_PROGRESSIVE_GRID_ROWS + 1)
+        y_bins = np.linspace(0.0, FIELD_Y, REPORT_PROGRESSIVE_GRID_COLS + 1)
+        grid = np.zeros((REPORT_PROGRESSIVE_GRID_ROWS, REPORT_PROGRESSIVE_GRID_COLS), dtype=float)
+
+        x_idx = np.clip(
+            np.digitize(work[x_col].to_numpy(), x_bins, right=True) - 1,
+            0,
+            REPORT_PROGRESSIVE_GRID_ROWS - 1,
+        )
+        y_idx = np.clip(
+            np.digitize(work[y_col].to_numpy(), y_bins, right=True) - 1,
+            0,
+            REPORT_PROGRESSIVE_GRID_COLS - 1,
+        )
+        for ix, iy in zip(x_idx, y_idx):
+            grid[ix, iy] += 1.0
+
+        display_grid = (
+            gaussian_filter(grid, sigma=REPORT_PROGRESSIVE_SMOOTH_SIGMA)
+            if float(grid.max()) > 0
+            else grid
+        )
+        vmax = max(float(display_grid.max()), 1.0)
+        norm = PowerNorm(gamma=REPORT_PROGRESSIVE_GAMMA, vmin=0.0, vmax=vmax)
+        gap = REPORT_PROGRESSIVE_CELL_GAP
+        empty_color = "#14101c"
+        render_threshold = vmax * 0.06
+
+        for ix in range(REPORT_PROGRESSIVE_GRID_ROWS):
+            for iy in range(REPORT_PROGRESSIVE_GRID_COLS):
+                raw = float(grid[ix, iy])
+                value = float(display_grid[ix, iy])
+                if raw <= 0 and value < render_threshold:
+                    continue
+                x0, x1 = float(x_bins[ix]), float(x_bins[ix + 1])
+                y0, y1 = float(y_bins[iy]), float(y_bins[iy + 1])
+                face = CMAP_REPORT_PROGRESSIVE(norm(value)) if value > 0 else empty_color
+                ax.add_patch(
+                    Rectangle(
+                        (y0 + gap, x0 + gap),
+                        max((y1 - y0) - 2 * gap, 0.05),
+                        max((x1 - x0) - 2 * gap, 0.05),
+                        facecolor=face,
+                        edgecolor=(0.0, 0.0, 0.0, 0.18 if raw <= 0 else 0.34),
+                        linewidth=0.16 if raw <= 0 else 0.22,
+                        alpha=0.98 if raw > 0 else min(0.82, 0.42 + 0.56 * (value / vmax)),
+                        zorder=2,
+                    )
+                )
+
+        pitch.draw(ax=ax)
+
+    fig.subplots_adjust(left=0.005, right=0.995, top=0.995, bottom=0.04)
+    ax.set_title("")
+    _report_vertical_attack_arrow(fig, ax)
+    ax.set_axis_off()
+    return fig
+
+
+def _report_vertical_soft_grid_heatmap(
+    passes,
+    *,
+    x_col: str,
+    y_col: str,
+) -> plt.Figure:
+    """Portrait report heatmap — dense binned cells."""
+    return _report_vertical_binned_grid_heatmap(
+        passes,
+        x_col=x_col,
+        y_col=y_col,
+    )
+
+
+def _zone_centroid(
+    row_idx: int,
+    col_idx: int,
+    x_bins: np.ndarray,
+    y_bins: np.ndarray,
+) -> tuple[float, float]:
+    x0, x1 = float(x_bins[row_idx]), float(x_bins[row_idx + 1])
+    y0, y1 = float(y_bins[col_idx]), float(y_bins[col_idx + 1])
+    return (x0 + x1) * 0.5, (y0 + y1) * 0.5
+
+
+def _digitize_zone(values: np.ndarray, bins: np.ndarray, max_idx: int) -> np.ndarray:
+    return np.clip(np.digitize(values, bins, right=True) - 1, 0, max_idx)
+
+
+def compute_report_progressive_links(passes) -> list[dict[str, float | int]]:
+    """Top destination zones ranked by progressive-pass volume."""
+    from collections import defaultdict
+
+    work = filter_live_ball_passes(passes)
+    if work is None or work.empty:
+        return []
+    if "has_end" in work.columns:
+        work = work[work["has_end"].astype(bool)].copy()
+    if work.empty:
+        return []
+
+    x_bins = np.linspace(0.0, FIELD_X, REPORT_LINK_ZONE_ROWS + 1)
+    y_bins = np.linspace(0.0, FIELD_Y, REPORT_LINK_ZONE_COLS + 1)
+    max_row = REPORT_LINK_ZONE_ROWS - 1
+    max_col = REPORT_LINK_ZONE_COLS - 1
+
+    zone_origins: dict[tuple[int, int], list[tuple[float, float]]] = defaultdict(list)
+    zone_counts: dict[tuple[int, int], int] = defaultdict(int)
+    for row in work.itertuples(index=False):
+        drow = int(_digitize_zone(np.array([row.x_end]), x_bins, max_row)[0])
+        dcol = int(_digitize_zone(np.array([row.y_end]), y_bins, max_col)[0])
+        zone_origins[(drow, dcol)].append((float(row.x_start), float(row.y_start)))
+        zone_counts[(drow, dcol)] += 1
+
+    top_zones = sorted(zone_counts.items(), key=lambda item: item[1], reverse=True)[:REPORT_LINK_TOP_N]
+    links: list[dict[str, float | int]] = []
+    for rank, ((drow, dcol), count) in enumerate(top_zones, start=1):
+        origins = zone_origins[(drow, dcol)]
+        x0 = float(np.mean([o[0] for o in origins]))
+        y0 = float(np.mean([o[1] for o in origins]))
+        x1, y1 = _zone_centroid(drow, dcol, x_bins, y_bins)
+        links.append(
+            {
+                "rank": rank,
+                "count": int(count),
+                "origin_x": x0,
+                "origin_y": y0,
+                "dest_x": x1,
+                "dest_y": y1,
+            }
+        )
+    return links
+
+
+def draw_report_progressive_links_map(passes) -> plt.Figure:
+    """Top 5 destination regions linked by progressive passes (vertical pitch)."""
+    figsize = (REPORT_PORTRAIT_FIG_W, REPORT_PORTRAIT_FIG_H)
+    fig, ax, pitch = _base_vertical_pitch(
+        figsize=figsize,
+        dpi=REPORT_PORTRAIT_DPI,
+        pad_bottom=REPORT_PITCH_PAD_BOTTOM,
+    )
+
+    pitch.draw(ax=ax)
+    links = compute_report_progressive_links(passes)
+    if links:
+        max_count = max(int(link["count"]) for link in links)
+        scale = REPORT_PORTRAIT_FIG_W / MAP_REF_WIDTH
+        for link in links:
+            rank = int(link["rank"])
+            count = int(link["count"])
+            x0 = float(link["origin_x"])
+            y0 = float(link["origin_y"])
+            x1 = float(link["dest_x"])
+            y1 = float(link["dest_y"])
+            width = (0.65 + 1.75 * (count / max_count)) * scale
+            alpha = REPORT_LINK_ARROW_ALPHA - (rank - 1) * 0.05
+            pitch.arrows(
+                x0,
+                y0,
+                x1,
+                y1,
+                width=width,
+                headwidth=1.1 * width,
+                headlength=1.1 * width,
+                color=REPORT_LINK_ARROW_COLOR,
+                alpha=max(alpha, 0.5),
+                ax=ax,
+                zorder=2 + rank,
+            )
+            pitch.annotate(
+                str(rank),
+                xy=(x1, y1),
+                ax=ax,
+                ha="center",
+                va="center",
+                fontsize=8.4 * scale,
+                color="#f8fafc",
+                fontweight="bold",
+                bbox=dict(
+                    boxstyle="circle,pad=0.22",
+                    facecolor="#0284c7",
+                    edgecolor="#e2e8f0",
+                    linewidth=0.7,
+                ),
+                zorder=12 + rank,
+            )
+
+    fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.05)
+    ax.set_title("")
+    _report_vertical_attack_arrow(fig, ax)
+    ax.set_axis_off()
+    return fig
+
+
+def draw_report_progressive_origin_heatmap(passes) -> plt.Figure:
+    """Portrait progressive-pass origin heatmap."""
+    return _report_vertical_binned_grid_heatmap(
+        passes,
+        x_col="x_start",
+        y_col="y_start",
+    )
+
+
+def draw_report_progressive_dest_heatmap(passes) -> plt.Figure:
+    """Portrait progressive-pass destination heatmap."""
+    return _report_vertical_binned_grid_heatmap(
+        passes,
+        x_col="x_end",
+        y_col="y_end",
+    )
+
+
+def _filter_report_impact_final_third_passes(passes):
+    """Impact v2 passes that originate in the attacking third."""
+    import xp_engine as xe_mod
+    from xp_stats_engine import FINAL_X_MIN
+
+    work = filter_live_ball_passes(passes)
+    if work is None or work.empty:
+        return work
+    impact = xe_mod.filter_test_impact_v2_passes(work)
+    if impact is None or impact.empty:
+        return impact
+    return impact.loc[impact["x_start"].astype(float) >= FINAL_X_MIN].copy()
+
+
+def draw_report_impact_final_third_heatmap(passes) -> plt.Figure:
+    """Portrait arrow map of Impact v2 passes originating in the final third."""
+    figsize = (REPORT_PORTRAIT_FIG_W, REPORT_PORTRAIT_FIG_H)
+    fig, ax, pitch = _base_vertical_pitch(
+        figsize=figsize,
+        dpi=REPORT_PORTRAIT_DPI,
+        pad_bottom=REPORT_PITCH_PAD_BOTTOM,
+    )
+
+    pitch.draw(ax=ax)
+    subset = _filter_report_impact_final_third_passes(passes)
+    scale = REPORT_PORTRAIT_FIG_W / MAP_REF_WIDTH
+
+    if subset is not None and not subset.empty:
+        work = subset
+        if "has_end" in work.columns:
+            work = work[work["has_end"].astype(bool)].copy()
+        if not work.empty:
+            xp_col = "xp_m4" if "xp_m4" in work.columns else None
+            if xp_col:
+                xp_values = work[xp_col].astype(float).to_numpy()
+                positive = xp_values[xp_values > 0]
+                vmax = max(float(np.percentile(positive, 92)) if len(positive) else 0.0, 0.05)
+                norm = PowerNorm(gamma=0.78, vmin=0.0, vmax=vmax)
+            else:
+                xp_values = np.ones(len(work), dtype=float)
+                norm = None
+                vmax = 1.0
+
+            order = np.argsort(xp_values)
+            for idx in order:
+                row = work.iloc[int(idx)]
+                xp_val = float(xp_values[int(idx)])
+                if norm is not None:
+                    color = CMAP_REPORT_XPV_RED(norm(max(xp_val, 0.0)))
+                    t = min(max(xp_val / vmax, 0.0), 1.0)
+                else:
+                    color = "#ef4444"
+                    t = 0.65
+                alpha = 0.78 + 0.2 * t
+                _delicate_arrows(
+                    pitch,
+                    ax,
+                    float(row.x_start),
+                    float(row.y_start),
+                    float(row.x_end),
+                    float(row.y_end),
+                    color,
+                    scale,
+                    alpha=alpha,
+                )
+                pitch.scatter(
+                    float(row.x_start),
+                    float(row.y_start),
+                    s=REPORT_IMPACT_ORIGIN_MARKER_SIZE,
+                    marker="o",
+                    color=color,
+                    edgecolors="white",
+                    linewidths=0.4,
+                    ax=ax,
+                    zorder=6,
+                    alpha=alpha,
+                )
+                pitch.scatter(
+                    float(row.x_end),
+                    float(row.y_end),
+                    s=REPORT_IMPACT_DEST_MARKER_SIZE,
+                    marker="s",
+                    color=color,
+                    edgecolors="white",
+                    linewidths=0.4,
+                    ax=ax,
+                    zorder=7,
+                    alpha=alpha,
+                )
+
+            if norm is not None and vmax > 0:
+                sm = plt.cm.ScalarMappable(cmap=CMAP_REPORT_XPV_RED, norm=norm)
+                cbar = fig.colorbar(sm, ax=ax, fraction=0.02, pad=0.015, shrink=0.42)
+                cbar.ax.yaxis.set_tick_params(color="#ffffff", labelsize=5.5)
+                plt.setp(cbar.ax.axes.get_yticklabels(), color="#ffffff")
+                cbar.set_label("xPV", color="#e2e8f0", fontsize=6)
+
+    fig.subplots_adjust(left=0.005, right=0.995, top=0.995, bottom=0.04)
+    ax.set_title("")
+    _report_vertical_attack_arrow(fig, ax)
+    ax.set_axis_off()
+    return fig
