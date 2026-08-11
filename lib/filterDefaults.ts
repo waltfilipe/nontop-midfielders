@@ -8,7 +8,6 @@ export const DEFAULT_FILTER_OPTIONS: FilterOptionsMeta = {
   leagues: [
     { key: "all", label: "All leagues" },
     { key: "belgian_pro_league", label: "Belgian Pro League" },
-    { key: "croatian_league", label: "Croatian League" },
     { key: "eredivisie", label: "Eredivisie" },
     { key: "greek_super_league", label: "Greek Super League" },
     { key: "liga_portugal", label: "Liga Portugal" },

@@ -53,15 +53,9 @@ LETTER_GRADE_OPTIONS = [
     ("D", "D"),
 ]
 
-LEAGUE_OPTIONS = [
-    ("all", "All leagues"),
-    ("belgian_pro_league", "Belgian Pro League"),
-    ("croatian_league", "Croatian League"),
-    ("eredivisie", "Eredivisie"),
-    ("greek_super_league", "Greek Super League"),
-    ("liga_portugal", "Liga Portugal"),
-    ("super_lig", "Süper Lig"),
-]
+from satellite_leagues import SATELLITE_LEAGUE_OPTIONS
+
+LEAGUE_OPTIONS = [("all", "All leagues"), *SATELLITE_LEAGUE_OPTIONS]
 
 FOOT_OPTIONS = [
     ("all", "Todos"),

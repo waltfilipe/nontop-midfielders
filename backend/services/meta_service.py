@@ -16,6 +16,7 @@ from position_families import (
 )
 from services.data_parts import family_data_available
 from services.filters import LEAGUE_OPTIONS, filter_options_meta
+from satellite_leagues import SATELLITE_LEAGUE_DESCRIPTION
 from xp_engine import european_passes_meta_path
 
 LEAGUE_SOURCE_KEYS = sorted(key for key, _label in LEAGUE_OPTIONS if key != "all")
@@ -75,7 +76,7 @@ def build_meta_payload(position_family: str) -> dict[str, Any]:
         "nationalities": list(cached_nationalities()),
         "filter_options": filter_options_meta(family),
         "description": (
-            f"Belgian Pro League, Croatia, Eredivisie, Greece, Portugal and Turkey {family_label.lower()} — "
+            f"{SATELLITE_LEAGUE_DESCRIPTION} {family_label.lower()} — "
             "pass ratings (xT v4), progression ratings, and xP analytics. "
             "All scores and ranks are computed within the selected position pool."
         ),

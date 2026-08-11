@@ -355,7 +355,7 @@ const en: Messages = {
   home: {
     eyebrow: "European pass analytics",
     lead:
-      "Pass analysis of top midfielders from six satellite European leagues: Eredivisie, Belgium, Turkey, Greece, Croatia and Portugal.",
+      "Pass analysis of top midfielders from five satellite European leagues: Eredivisie, Belgium, Turkey, Greece and Portugal.",
     playersStat: "players",
     leaguesStat: "leagues",
     modelStat: "M4 model",
@@ -400,7 +400,7 @@ const en: Messages = {
     modules: {
       reports: {
         title: "Reports",
-        description: "PDF-ready reports for 45 midfielders — xP grades, pass scores and maps by age group.",
+        description: "PDF-ready reports for 42 midfielders — xP grades, pass scores and maps by age group.",
       },
       profile: {
         title: "Profile",
@@ -530,7 +530,7 @@ const en: Messages = {
     categories: {
       all: {
         title: "All players",
-        description: "Full curated pool of 45 midfielders.",
+        description: "Full curated pool of 42 midfielders.",
       },
       u23: {
         title: "U23",
@@ -707,7 +707,7 @@ const en: Messages = {
     all: {
       title: "All Players",
       subtitle: "Full curated pool",
-      description: "All 45 midfielders ranked against the full European midfielder pool.",
+      description: "All 42 midfielders ranked against the curated satellite-league pool.",
     },
     "u23-breakout": {
       title: "U23 — Breakout Promises",
@@ -792,7 +792,7 @@ const pt: Messages = {
   home: {
     eyebrow: "Análise de passes na Europa",
     lead:
-      "Análise de passes dos principais meio-campistas de seis ligas satélite europeias: Eredivisie, Bélgica, Turquia, Grécia, Croácia e Portugal.",
+      "Análise de passes dos principais meio-campistas de cinco ligas satélite europeias: Eredivisie, Bélgica, Turquia, Grécia e Portugal.",
     playersStat: "jogadores",
     leaguesStat: "ligas",
     modelStat: "modelo M4",
@@ -837,7 +837,7 @@ const pt: Messages = {
     modules: {
       reports: {
         title: "Relatórios",
-        description: "Relatórios PDF de 45 meias — grades xP, pass scores e mapas por faixa etária.",
+        description: "Relatórios PDF de 42 meias — grades xP, pass scores e mapas por faixa etária.",
       },
       profile: {
         title: "Perfil",
@@ -967,7 +967,7 @@ const pt: Messages = {
     categories: {
       all: {
         title: "Todos os jogadores",
-        description: "Pool completo de 45 meio-campistas.",
+        description: "Pool completo de 42 meio-campistas.",
       },
       u23: {
         title: "U23",
@@ -1144,7 +1144,7 @@ const pt: Messages = {
     all: {
       title: "Todos os jogadores",
       subtitle: "Pool completo",
-      description: "Os 45 meias com ranking contra o pool europeu completo.",
+      description: "Os 42 meias com ranking contra o pool curado das ligas satélite.",
     },
     "u23-breakout": {
       title: "U23 — Promessas",

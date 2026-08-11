@@ -5,7 +5,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "xP & xPV Analysis",
-  description: "Pass analysis of top midfielders from six satellite European leagues: Eredivisie, Belgium, Turkey, Greece, Croatia and Portugal.",
+  description: "Pass analysis of top midfielders from five satellite European leagues: Eredivisie, Belgium, Turkey, Greece and Portugal.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

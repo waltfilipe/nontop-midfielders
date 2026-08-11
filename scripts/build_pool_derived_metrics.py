@@ -21,6 +21,7 @@ os.environ.setdefault("PASS_SCOUT_MODE", "local")
 import passes_engine as pe  # noqa: E402
 import xp_engine as xe  # noqa: E402
 import xp_stats_engine as xstats  # noqa: E402
+from satellite_leagues import league_is_active  # noqa: E402
 
 OUTPUT = Path(__file__).resolve().parents[1] / "data" / "pool-derived-metrics.json"
 CURATED_IDS_PATH = Path(__file__).resolve().parents[1] / "data" / "player-ids.json"
@@ -96,7 +97,7 @@ def main() -> None:
         pool_payload = json.load(fh)
     analysis_players = [
         p for p in pool_payload.get("players", pool_payload)
-        if str(p.get("player_id", "")) in curated_ids
+        if str(p.get("player_id", "")) in curated_ids and league_is_active(p.get("league_source"))
     ]
     xp_passes_by_player = xe.load_european_league_xp_passes_grouped(POSITION_FAMILY)
 
