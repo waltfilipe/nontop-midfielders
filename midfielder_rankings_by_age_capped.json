@@ -1,0 +1,992 @@
+{
+  "criteria": {
+    "position_family": "midfielders",
+    "eligibility": "eligible_for_rating (minutes >= P20 and passes >= P20 per position group)",
+    "max_per_league": 5,
+    "top_n_per_band": 15
+  },
+  "bands": {
+    "u23": {
+      "title": "U23 — Breakout Promises",
+      "pool_size": 107,
+      "league_counts": {
+        "Bélgica": 4,
+        "Croácia": 1,
+        "Eredivisie": 5,
+        "Grécia": 2,
+        "Portugal": 0,
+        "Turquia": 3
+      },
+      "players": [
+        {
+          "rank": 1,
+          "player_id": "1405756",
+          "player_name": "Kees Smit",
+          "position": "CM",
+          "age": 20,
+          "team": "AZ Alkmaar",
+          "league": "Eredivisie",
+          "league_source": "eredivise",
+          "xp_pass_rating": 0.8114,
+          "passes_completed": 1047
+        },
+        {
+          "rank": 2,
+          "player_id": "1094538",
+          "player_name": "Yassine Titraoui",
+          "position": "CM",
+          "age": 22,
+          "team": "RC Sporting Charleroi",
+          "league": "Bélgica",
+          "league_source": "belgian",
+          "xp_pass_rating": 0.783,
+          "passes_completed": 1315
+        },
+        {
+          "rank": 3,
+          "player_id": "1888002",
+          "player_name": "Christ Inao Oulaï",
+          "position": "CM",
+          "age": 20,
+          "team": "Trabzonspor",
+          "league": "Turquia",
+          "league_source": "turkey",
+          "xp_pass_rating": 0.7821,
+          "passes_completed": 1109
+        },
+        {
+          "rank": 4,
+          "player_id": "1121400",
+          "player_name": "Luciano Valente",
+          "position": "LCM",
+          "age": 22,
+          "team": "Feyenoord",
+          "league": "Eredivisie",
+          "league_source": "eredivise",
+          "xp_pass_rating": 0.776,
+          "passes_completed": 1149
+        },
+        {
+          "rank": 5,
+          "player_id": "1184054",
+          "player_name": "Kodai Sano",
+          "position": "CM",
+          "age": 22,
+          "team": "NEC Nijmegen",
+          "league": "Eredivisie",
+          "league_source": "eredivise",
+          "xp_pass_rating": 0.7664,
+          "passes_completed": 1348
+        },
+        {
+          "rank": 6,
+          "player_id": "1002007",
+          "player_name": "Giannis Konstantelias",
+          "position": "LCM",
+          "age": 23,
+          "team": "PAOK",
+          "league": "Grécia",
+          "league_source": "greek",
+          "xp_pass_rating": 0.7655,
+          "passes_completed": 562
+        },
+        {
+          "rank": 7,
+          "player_id": "997165",
+          "player_name": "Bartuğ Elmaz",
+          "position": "LCM",
+          "age": 23,
+          "team": "Fatih Karagümrük",
+          "league": "Turquia",
+          "league_source": "turkey",
+          "xp_pass_rating": 0.7625,
+          "passes_completed": 696
+        },
+        {
+          "rank": 8,
+          "player_id": "1441117",
+          "player_name": "Tygo Land",
+          "position": "CM",
+          "age": 20,
+          "team": "FC Groningen",
+          "league": "Eredivisie",
+          "league_source": "eredivise",
+          "xp_pass_rating": 0.7562,
+          "passes_completed": 782
+        },
+        {
+          "rank": 9,
+          "player_id": "1153957",
+          "player_name": "Aleksandar Stanković",
+          "position": "CM",
+          "age": 21,
+          "team": "Club Brugge KV",
+          "league": "Bélgica",
+          "league_source": "belgian",
+          "xp_pass_rating": 0.7536,
+          "passes_completed": 1488
+        },
+        {
+          "rank": 10,
+          "player_id": "1859920",
+          "player_name": "Sean Steur",
+          "position": "LCM",
+          "age": 18,
+          "team": "AFC Ajax",
+          "league": "Eredivisie",
+          "league_source": "eredivise",
+          "xp_pass_rating": 0.7529,
+          "passes_completed": 550
+        },
+        {
+          "rank": 11,
+          "player_id": "1065258",
+          "player_name": "Adrion Pajaziti",
+          "position": "CM",
+          "age": 23,
+          "team": "HNK Hajduk Split",
+          "league": "Croácia",
+          "league_source": "croata",
+          "xp_pass_rating": 0.7241,
+          "passes_completed": 1167
+        },
+        {
+          "rank": 12,
+          "player_id": "997022",
+          "player_name": "Diogo Nascimento",
+          "position": "CM",
+          "age": 23,
+          "team": "Olympiacos FC",
+          "league": "Grécia",
+          "league_source": "greek",
+          "xp_pass_rating": 0.7173,
+          "passes_completed": 550
+        },
+        {
+          "rank": 13,
+          "player_id": "1002146",
+          "player_name": "Maestro",
+          "position": "CM",
+          "age": 23,
+          "team": "Alanyaspor",
+          "league": "Turquia",
+          "league_source": "turkey",
+          "xp_pass_rating": 0.71,
+          "passes_completed": 635
+        },
+        {
+          "rank": 14,
+          "player_id": "1188173",
+          "player_name": "Thomas Claes",
+          "position": "LCM",
+          "age": 22,
+          "team": "SV Zulte Waregem",
+          "league": "Bélgica",
+          "league_source": "belgian",
+          "xp_pass_rating": 0.7027,
+          "passes_completed": 1046
+        },
+        {
+          "rank": 15,
+          "player_id": "1191892",
+          "player_name": "Tochukwu Nnadi",
+          "position": "CM",
+          "age": 23,
+          "team": "SV Zulte Waregem",
+          "league": "Bélgica",
+          "league_source": "belgian",
+          "xp_pass_rating": 0.6973,
+          "passes_completed": 629
+        }
+      ],
+      "by_league": {
+        "Bélgica": [
+          {
+            "rank": 2,
+            "player_name": "Yassine Titraoui",
+            "position": "CM",
+            "age": 22,
+            "team": "RC Sporting Charleroi",
+            "xp_pass_rating": 0.783
+          },
+          {
+            "rank": 9,
+            "player_name": "Aleksandar Stanković",
+            "position": "CM",
+            "age": 21,
+            "team": "Club Brugge KV",
+            "xp_pass_rating": 0.7536
+          },
+          {
+            "rank": 14,
+            "player_name": "Thomas Claes",
+            "position": "LCM",
+            "age": 22,
+            "team": "SV Zulte Waregem",
+            "xp_pass_rating": 0.7027
+          },
+          {
+            "rank": 15,
+            "player_name": "Tochukwu Nnadi",
+            "position": "CM",
+            "age": 23,
+            "team": "SV Zulte Waregem",
+            "xp_pass_rating": 0.6973
+          }
+        ],
+        "Croácia": [
+          {
+            "rank": 11,
+            "player_name": "Adrion Pajaziti",
+            "position": "CM",
+            "age": 23,
+            "team": "HNK Hajduk Split",
+            "xp_pass_rating": 0.7241
+          }
+        ],
+        "Eredivisie": [
+          {
+            "rank": 1,
+            "player_name": "Kees Smit",
+            "position": "CM",
+            "age": 20,
+            "team": "AZ Alkmaar",
+            "xp_pass_rating": 0.8114
+          },
+          {
+            "rank": 4,
+            "player_name": "Luciano Valente",
+            "position": "LCM",
+            "age": 22,
+            "team": "Feyenoord",
+            "xp_pass_rating": 0.776
+          },
+          {
+            "rank": 5,
+            "player_name": "Kodai Sano",
+            "position": "CM",
+            "age": 22,
+            "team": "NEC Nijmegen",
+            "xp_pass_rating": 0.7664
+          },
+          {
+            "rank": 8,
+            "player_name": "Tygo Land",
+            "position": "CM",
+            "age": 20,
+            "team": "FC Groningen",
+            "xp_pass_rating": 0.7562
+          },
+          {
+            "rank": 10,
+            "player_name": "Sean Steur",
+            "position": "LCM",
+            "age": 18,
+            "team": "AFC Ajax",
+            "xp_pass_rating": 0.7529
+          }
+        ],
+        "Grécia": [
+          {
+            "rank": 6,
+            "player_name": "Giannis Konstantelias",
+            "position": "LCM",
+            "age": 23,
+            "team": "PAOK",
+            "xp_pass_rating": 0.7655
+          },
+          {
+            "rank": 12,
+            "player_name": "Diogo Nascimento",
+            "position": "CM",
+            "age": 23,
+            "team": "Olympiacos FC",
+            "xp_pass_rating": 0.7173
+          }
+        ],
+        "Portugal": [],
+        "Turquia": [
+          {
+            "rank": 3,
+            "player_name": "Christ Inao Oulaï",
+            "position": "CM",
+            "age": 20,
+            "team": "Trabzonspor",
+            "xp_pass_rating": 0.7821
+          },
+          {
+            "rank": 7,
+            "player_name": "Bartuğ Elmaz",
+            "position": "LCM",
+            "age": 23,
+            "team": "Fatih Karagümrük",
+            "xp_pass_rating": 0.7625
+          },
+          {
+            "rank": 13,
+            "player_name": "Maestro",
+            "position": "CM",
+            "age": 23,
+            "team": "Alanyaspor",
+            "xp_pass_rating": 0.71
+          }
+        ]
+      }
+    },
+    "24_30": {
+      "title": "24–30 — Blue Collar Prospects",
+      "pool_size": 186,
+      "league_counts": {
+        "Bélgica": 3,
+        "Croácia": 0,
+        "Eredivisie": 2,
+        "Grécia": 4,
+        "Portugal": 4,
+        "Turquia": 2
+      },
+      "players": [
+        {
+          "rank": 1,
+          "player_id": "850816",
+          "player_name": "Joey Veerman",
+          "position": "LCM",
+          "age": 27,
+          "team": "PSV Eindhoven",
+          "league": "Eredivisie",
+          "league_source": "eredivise",
+          "xp_pass_rating": 0.8317,
+          "passes_completed": 1659
+        },
+        {
+          "rank": 2,
+          "player_id": "801025",
+          "player_name": "Bryan Heynen",
+          "position": "LCM",
+          "age": 29,
+          "team": "KRC Genk",
+          "league": "Bélgica",
+          "league_source": "belgian",
+          "xp_pass_rating": 0.8311,
+          "passes_completed": 2151
+        },
+        {
+          "rank": 3,
+          "player_id": "920684",
+          "player_name": "Jordan Holsgrove",
+          "position": "CM",
+          "age": 26,
+          "team": "Estoril Praia",
+          "league": "Portugal",
+          "league_source": "portugal",
+          "xp_pass_rating": 0.8301,
+          "passes_completed": 1999
+        },
+        {
+          "rank": 4,
+          "player_id": "907461",
+          "player_name": "Orkun Kökçü",
+          "position": "LCM",
+          "age": 25,
+          "team": "Beşiktaş JK",
+          "league": "Turquia",
+          "league_source": "turkey",
+          "xp_pass_rating": 0.827,
+          "passes_completed": 1308
+        },
+        {
+          "rank": 5,
+          "player_id": "1000472",
+          "player_name": "Adem Zorgane",
+          "position": "RCM",
+          "age": 26,
+          "team": "Royale Union Saint-Gilloise",
+          "league": "Bélgica",
+          "league_source": "belgian",
+          "xp_pass_rating": 0.8181,
+          "passes_completed": 1567
+        },
+        {
+          "rank": 6,
+          "player_id": "1087316",
+          "player_name": "Enzo Barrenechea",
+          "position": "CM",
+          "age": 25,
+          "team": "Benfica",
+          "league": "Portugal",
+          "league_source": "portugal",
+          "xp_pass_rating": 0.8158,
+          "passes_completed": 1281
+        },
+        {
+          "rank": 7,
+          "player_id": "754794",
+          "player_name": "Lucas Torreira",
+          "position": "CM",
+          "age": 30,
+          "team": "Galatasaray",
+          "league": "Turquia",
+          "league_source": "turkey",
+          "xp_pass_rating": 0.8137,
+          "passes_completed": 1360
+        },
+        {
+          "rank": 8,
+          "player_id": "859917",
+          "player_name": "Morten Hjulmand",
+          "position": "CM",
+          "age": 27,
+          "team": "Sporting CP",
+          "league": "Portugal",
+          "league_source": "portugal",
+          "xp_pass_rating": 0.8077,
+          "passes_completed": 1420
+        },
+        {
+          "rank": 9,
+          "player_id": "799216",
+          "player_name": "Pedro Chirivella",
+          "position": "CM",
+          "age": 29,
+          "team": "Panathinaikos FC",
+          "league": "Grécia",
+          "league_source": "greek",
+          "xp_pass_rating": 0.806,
+          "passes_completed": 902
+        },
+        {
+          "rank": 10,
+          "player_id": "840412",
+          "player_name": "Giannis Kosti",
+          "position": "CM",
+          "age": 26,
+          "team": "APO Levadiakos",
+          "league": "Grécia",
+          "league_source": "greek",
+          "xp_pass_rating": 0.8041,
+          "passes_completed": 1285
+        },
+        {
+          "rank": 11,
+          "player_id": "228364",
+          "player_name": "Fredrik Aursnes",
+          "position": "CM",
+          "age": 30,
+          "team": "Benfica",
+          "league": "Portugal",
+          "league_source": "portugal",
+          "xp_pass_rating": 0.7988,
+          "passes_completed": 1122
+        },
+        {
+          "rank": 12,
+          "player_id": "831697",
+          "player_name": "Ryotaro Ito",
+          "position": "CM",
+          "age": 28,
+          "team": "Sint-Truidense VV",
+          "league": "Bélgica",
+          "league_source": "belgian",
+          "xp_pass_rating": 0.7975,
+          "passes_completed": 1362
+        },
+        {
+          "rank": 13,
+          "player_id": "850404",
+          "player_name": "Orbelín Pineda",
+          "position": "CM",
+          "age": 30,
+          "team": "AEK Athens",
+          "league": "Grécia",
+          "league_source": "greek",
+          "xp_pass_rating": 0.7964,
+          "passes_completed": 1472
+        },
+        {
+          "rank": 14,
+          "player_id": "279563",
+          "player_name": "Răzvan Marin",
+          "position": "CM",
+          "age": 30,
+          "team": "AEK Athens",
+          "league": "Grécia",
+          "league_source": "greek",
+          "xp_pass_rating": 0.7953,
+          "passes_completed": 1164
+        },
+        {
+          "rank": 15,
+          "player_id": "989882",
+          "player_name": "Ramiz Zerrouki",
+          "position": "CM",
+          "age": 28,
+          "team": "FC Twente",
+          "league": "Eredivisie",
+          "league_source": "eredivise",
+          "xp_pass_rating": 0.794,
+          "passes_completed": 1387
+        }
+      ],
+      "by_league": {
+        "Bélgica": [
+          {
+            "rank": 2,
+            "player_name": "Bryan Heynen",
+            "position": "LCM",
+            "age": 29,
+            "team": "KRC Genk",
+            "xp_pass_rating": 0.8311
+          },
+          {
+            "rank": 5,
+            "player_name": "Adem Zorgane",
+            "position": "RCM",
+            "age": 26,
+            "team": "Royale Union Saint-Gilloise",
+            "xp_pass_rating": 0.8181
+          },
+          {
+            "rank": 12,
+            "player_name": "Ryotaro Ito",
+            "position": "CM",
+            "age": 28,
+            "team": "Sint-Truidense VV",
+            "xp_pass_rating": 0.7975
+          }
+        ],
+        "Croácia": [],
+        "Eredivisie": [
+          {
+            "rank": 1,
+            "player_name": "Joey Veerman",
+            "position": "LCM",
+            "age": 27,
+            "team": "PSV Eindhoven",
+            "xp_pass_rating": 0.8317
+          },
+          {
+            "rank": 15,
+            "player_name": "Ramiz Zerrouki",
+            "position": "CM",
+            "age": 28,
+            "team": "FC Twente",
+            "xp_pass_rating": 0.794
+          }
+        ],
+        "Grécia": [
+          {
+            "rank": 9,
+            "player_name": "Pedro Chirivella",
+            "position": "CM",
+            "age": 29,
+            "team": "Panathinaikos FC",
+            "xp_pass_rating": 0.806
+          },
+          {
+            "rank": 10,
+            "player_name": "Giannis Kosti",
+            "position": "CM",
+            "age": 26,
+            "team": "APO Levadiakos",
+            "xp_pass_rating": 0.8041
+          },
+          {
+            "rank": 13,
+            "player_name": "Orbelín Pineda",
+            "position": "CM",
+            "age": 30,
+            "team": "AEK Athens",
+            "xp_pass_rating": 0.7964
+          },
+          {
+            "rank": 14,
+            "player_name": "Răzvan Marin",
+            "position": "CM",
+            "age": 30,
+            "team": "AEK Athens",
+            "xp_pass_rating": 0.7953
+          }
+        ],
+        "Portugal": [
+          {
+            "rank": 3,
+            "player_name": "Jordan Holsgrove",
+            "position": "CM",
+            "age": 26,
+            "team": "Estoril Praia",
+            "xp_pass_rating": 0.8301
+          },
+          {
+            "rank": 6,
+            "player_name": "Enzo Barrenechea",
+            "position": "CM",
+            "age": 25,
+            "team": "Benfica",
+            "xp_pass_rating": 0.8158
+          },
+          {
+            "rank": 8,
+            "player_name": "Morten Hjulmand",
+            "position": "CM",
+            "age": 27,
+            "team": "Sporting CP",
+            "xp_pass_rating": 0.8077
+          },
+          {
+            "rank": 11,
+            "player_name": "Fredrik Aursnes",
+            "position": "CM",
+            "age": 30,
+            "team": "Benfica",
+            "xp_pass_rating": 0.7988
+          }
+        ],
+        "Turquia": [
+          {
+            "rank": 4,
+            "player_name": "Orkun Kökçü",
+            "position": "LCM",
+            "age": 25,
+            "team": "Beşiktaş JK",
+            "xp_pass_rating": 0.827
+          },
+          {
+            "rank": 7,
+            "player_name": "Lucas Torreira",
+            "position": "CM",
+            "age": 30,
+            "team": "Galatasaray",
+            "xp_pass_rating": 0.8137
+          }
+        ]
+      }
+    },
+    "over30": {
+      "title": "30+ — Standout Experience",
+      "pool_size": 68,
+      "league_counts": {
+        "Bélgica": 2,
+        "Croácia": 2,
+        "Eredivisie": 1,
+        "Grécia": 3,
+        "Portugal": 3,
+        "Turquia": 4
+      },
+      "players": [
+        {
+          "rank": 1,
+          "player_id": "118085",
+          "player_name": "Hans Vanaken",
+          "position": "LCM",
+          "age": 33,
+          "team": "Club Brugge KV",
+          "league": "Bélgica",
+          "league_source": "belgian",
+          "xp_pass_rating": 0.8317,
+          "passes_completed": 2283
+        },
+        {
+          "rank": 2,
+          "player_id": "6562",
+          "player_name": "João Moutinho",
+          "position": "CM",
+          "age": 39,
+          "team": "Sporting Braga",
+          "league": "Portugal",
+          "league_source": "portugal",
+          "xp_pass_rating": 0.8315,
+          "passes_completed": 1944
+        },
+        {
+          "rank": 3,
+          "player_id": "138842",
+          "player_name": "Joris van Overeem",
+          "position": "CM",
+          "age": 32,
+          "team": "SC Heerenveen",
+          "league": "Eredivisie",
+          "league_source": "eredivise",
+          "xp_pass_rating": 0.8239,
+          "passes_completed": 1470
+        },
+        {
+          "rank": 4,
+          "player_id": "89346",
+          "player_name": "Ljuban Crepulja",
+          "position": "CM",
+          "age": 32,
+          "team": "NK Slaven Belupo",
+          "league": "Croácia",
+          "league_source": "croata",
+          "xp_pass_rating": 0.8205,
+          "passes_completed": 1188
+        },
+        {
+          "rank": 5,
+          "player_id": "243713",
+          "player_name": "Josip Mišić",
+          "position": "CM",
+          "age": 32,
+          "team": "GNK Dinamo Zagreb",
+          "league": "Croácia",
+          "league_source": "croata",
+          "xp_pass_rating": 0.8095,
+          "passes_completed": 1367
+        },
+        {
+          "rank": 6,
+          "player_id": "180511",
+          "player_name": "Alexandru Maxim",
+          "position": "CM",
+          "age": 36,
+          "team": "Gaziantep FK",
+          "league": "Turquia",
+          "league_source": "turkey",
+          "xp_pass_rating": 0.8022,
+          "passes_completed": 1260
+        },
+        {
+          "rank": 7,
+          "player_id": "211116",
+          "player_name": "Andreas Bouchalakis",
+          "position": "CM",
+          "age": 33,
+          "team": "GFS Panetolikos",
+          "league": "Grécia",
+          "league_source": "greek",
+          "xp_pass_rating": 0.7891,
+          "passes_completed": 1212
+        },
+        {
+          "rank": 8,
+          "player_id": "45853",
+          "player_name": "İlkay Gündoğan",
+          "position": "LCM",
+          "age": 35,
+          "team": "Galatasaray",
+          "league": "Turquia",
+          "league_source": "turkey",
+          "xp_pass_rating": 0.7852,
+          "passes_completed": 980
+        },
+        {
+          "rank": 9,
+          "player_id": "80465",
+          "player_name": "Petros Mantalos",
+          "position": "CM",
+          "age": 34,
+          "team": "AEK Athens",
+          "league": "Grécia",
+          "league_source": "greek",
+          "xp_pass_rating": 0.7773,
+          "passes_completed": 653
+        },
+        {
+          "rank": 10,
+          "player_id": "926560",
+          "player_name": "Hidemasa Morita",
+          "position": "CM",
+          "age": 31,
+          "team": "Sporting CP",
+          "league": "Portugal",
+          "league_source": "portugal",
+          "xp_pass_rating": 0.773,
+          "passes_completed": 1001
+        },
+        {
+          "rank": 11,
+          "player_id": "905455",
+          "player_name": "Alan",
+          "position": "CM",
+          "age": 37,
+          "team": "Moreirense",
+          "league": "Portugal",
+          "league_source": "portugal",
+          "xp_pass_rating": 0.7461,
+          "passes_completed": 932
+        },
+        {
+          "rank": 12,
+          "player_id": "307284",
+          "player_name": "Mario Lemina",
+          "position": "CM",
+          "age": 32,
+          "team": "Galatasaray",
+          "league": "Turquia",
+          "league_source": "turkey",
+          "xp_pass_rating": 0.744,
+          "passes_completed": 962
+        },
+        {
+          "rank": 13,
+          "player_id": "94290",
+          "player_name": "Hannes Van Der Bruggen",
+          "position": "LCM",
+          "age": 33,
+          "team": "Cercle Brugge",
+          "league": "Bélgica",
+          "league_source": "belgian",
+          "xp_pass_rating": 0.7416,
+          "passes_completed": 1005
+        },
+        {
+          "rank": 14,
+          "player_id": "243623",
+          "player_name": "Fred",
+          "position": "CM",
+          "age": 33,
+          "team": "Fenerbahçe",
+          "league": "Turquia",
+          "league_source": "turkey",
+          "xp_pass_rating": 0.7404,
+          "passes_completed": 858
+        },
+        {
+          "rank": 15,
+          "player_id": "772685",
+          "player_name": "Juanpi Añor",
+          "position": "CM",
+          "age": 32,
+          "team": "NPS Volos",
+          "league": "Grécia",
+          "league_source": "greek",
+          "xp_pass_rating": 0.7304,
+          "passes_completed": 621
+        }
+      ],
+      "by_league": {
+        "Bélgica": [
+          {
+            "rank": 1,
+            "player_name": "Hans Vanaken",
+            "position": "LCM",
+            "age": 33,
+            "team": "Club Brugge KV",
+            "xp_pass_rating": 0.8317
+          },
+          {
+            "rank": 13,
+            "player_name": "Hannes Van Der Bruggen",
+            "position": "LCM",
+            "age": 33,
+            "team": "Cercle Brugge",
+            "xp_pass_rating": 0.7416
+          }
+        ],
+        "Croácia": [
+          {
+            "rank": 4,
+            "player_name": "Ljuban Crepulja",
+            "position": "CM",
+            "age": 32,
+            "team": "NK Slaven Belupo",
+            "xp_pass_rating": 0.8205
+          },
+          {
+            "rank": 5,
+            "player_name": "Josip Mišić",
+            "position": "CM",
+            "age": 32,
+            "team": "GNK Dinamo Zagreb",
+            "xp_pass_rating": 0.8095
+          }
+        ],
+        "Eredivisie": [
+          {
+            "rank": 3,
+            "player_name": "Joris van Overeem",
+            "position": "CM",
+            "age": 32,
+            "team": "SC Heerenveen",
+            "xp_pass_rating": 0.8239
+          }
+        ],
+        "Grécia": [
+          {
+            "rank": 7,
+            "player_name": "Andreas Bouchalakis",
+            "position": "CM",
+            "age": 33,
+            "team": "GFS Panetolikos",
+            "xp_pass_rating": 0.7891
+          },
+          {
+            "rank": 9,
+            "player_name": "Petros Mantalos",
+            "position": "CM",
+            "age": 34,
+            "team": "AEK Athens",
+            "xp_pass_rating": 0.7773
+          },
+          {
+            "rank": 15,
+            "player_name": "Juanpi Añor",
+            "position": "CM",
+            "age": 32,
+            "team": "NPS Volos",
+            "xp_pass_rating": 0.7304
+          }
+        ],
+        "Portugal": [
+          {
+            "rank": 2,
+            "player_name": "João Moutinho",
+            "position": "CM",
+            "age": 39,
+            "team": "Sporting Braga",
+            "xp_pass_rating": 0.8315
+          },
+          {
+            "rank": 10,
+            "player_name": "Hidemasa Morita",
+            "position": "CM",
+            "age": 31,
+            "team": "Sporting CP",
+            "xp_pass_rating": 0.773
+          },
+          {
+            "rank": 11,
+            "player_name": "Alan",
+            "position": "CM",
+            "age": 37,
+            "team": "Moreirense",
+            "xp_pass_rating": 0.7461
+          }
+        ],
+        "Turquia": [
+          {
+            "rank": 6,
+            "player_name": "Alexandru Maxim",
+            "position": "CM",
+            "age": 36,
+            "team": "Gaziantep FK",
+            "xp_pass_rating": 0.8022
+          },
+          {
+            "rank": 8,
+            "player_name": "İlkay Gündoğan",
+            "position": "LCM",
+            "age": 35,
+            "team": "Galatasaray",
+            "xp_pass_rating": 0.7852
+          },
+          {
+            "rank": 12,
+            "player_name": "Mario Lemina",
+            "position": "CM",
+            "age": 32,
+            "team": "Galatasaray",
+            "xp_pass_rating": 0.744
+          },
+          {
+            "rank": 14,
+            "player_name": "Fred",
+            "position": "CM",
+            "age": 33,
+            "team": "Fenerbahçe",
+            "xp_pass_rating": 0.7404
+          }
+        ]
+      }
+    }
+  }
+}
