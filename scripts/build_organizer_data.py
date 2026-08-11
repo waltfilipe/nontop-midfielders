@@ -8,8 +8,16 @@ import math
 from collections import defaultdict
 from pathlib import Path
 
+import sys
+
 ROOT = Path(__file__).resolve().parents[1]
-POOL_PATH = ROOT / "backend" / "data" / "api_pool_midfielders.json"
+BACKEND = ROOT / "backend"
+if str(BACKEND) not in sys.path:
+    sys.path.insert(0, str(BACKEND))
+
+from satellite_leagues import league_is_active  # noqa: E402
+
+POOL_PATH = BACKEND / "data" / "api_pool_midfielders.json"
 OUTPUT_DIR = ROOT / "data"
 CURATED_IDS_PATH = OUTPUT_DIR / "player-ids.json"
 
@@ -72,7 +80,10 @@ def _impact_index_ranks(players: list[dict]) -> dict[str, dict[str, int]]:
 def main() -> None:
     payload = json.loads(POOL_PATH.read_text(encoding="utf-8"))
     curated_ids = {str(pid) for pid in json.loads(CURATED_IDS_PATH.read_text(encoding="utf-8"))}
-    players = [p for p in payload["players"] if str(p.get("player_id", "")) in curated_ids]
+    players = [
+        p for p in payload["players"]
+        if str(p.get("player_id", "")) in curated_ids and league_is_active(p.get("league_source"))
+    ]
 
     ref_rows: list[dict] = []
     metric_rows: list[dict] = []

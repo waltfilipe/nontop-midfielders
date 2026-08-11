@@ -1,6 +1,5 @@
 const LEAGUE_LABELS: Record<string, string> = {
   belgian_pro_league: "Belgian Pro League",
-  croatian_league: "Croatian League",
   eredivisie: "Eredivisie",
   greek_super_league: "Greek Super League",
   liga_portugal: "Liga Portugal",

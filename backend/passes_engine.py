@@ -835,22 +835,16 @@ def _load_turkey_pass_frame() -> pd.DataFrame:
     return resolve_positions_in_csv_frame(frame)
 
 
-EUROPEAN_LEAGUE_LABELS: dict[str, str] = {
-    "belgian_pro_league": "Belgian Pro League",
-    "croatian_league": "Croatian League",
-    "eredivisie": "Eredivisie",
-    "greek_super_league": "Greek Super League",
-    "liga_portugal": "Liga Portugal",
-    "super_lig": "Süper Lig",
-}
+from satellite_leagues import SATELLITE_LEAGUE_OPTIONS  # noqa: E402
+
+EUROPEAN_LEAGUE_LABELS: dict[str, str] = dict(SATELLITE_LEAGUE_OPTIONS)
 
 
 def _load_european_league_pass_frame() -> pd.DataFrame:
-    """Combined passes from Belgian Pro League, Croatia, Eredivisie, Greece, Portugal and Turkey."""
+    """Combined passes from the five active satellite European leagues."""
     frames: list[pd.DataFrame] = []
     for source, loader in (
         ("belgian_pro_league", _load_belgian_pass_frame),
-        ("croatian_league", _load_croata_pass_frame),
         ("eredivisie", _load_eredivise_pass_frame),
         ("greek_super_league", _load_greek_pass_frame),
         ("liga_portugal", _load_portugal_pass_frame),
@@ -1050,7 +1044,7 @@ def build_european_league_midfielders(
     *,
     min_passes: int = 100,
 ) -> list[dict]:
-    """Midfielder metrics from Belgian Pro League, Croatia, Eredivisie, Greece, Portugal and Turkey."""
+    """Midfielder metrics from the five active satellite European leagues."""
     return build_european_league_players(
         "midfielders",
         cache_version,

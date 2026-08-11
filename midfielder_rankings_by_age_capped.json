@@ -11,7 +11,6 @@
       "pool_size": 107,
       "league_counts": {
         "Bélgica": 4,
-        "Croácia": 1,
         "Eredivisie": 5,
         "Grécia": 2,
         "Portugal": 0,
@@ -139,18 +138,6 @@
           "passes_completed": 550
         },
         {
-          "rank": 11,
-          "player_id": "1065258",
-          "player_name": "Adrion Pajaziti",
-          "position": "CM",
-          "age": 23,
-          "team": "HNK Hajduk Split",
-          "league": "Croácia",
-          "league_source": "croata",
-          "xp_pass_rating": 0.7241,
-          "passes_completed": 1167
-        },
-        {
           "rank": 12,
           "player_id": "997022",
           "player_name": "Diogo Nascimento",
@@ -232,16 +219,6 @@
             "age": 23,
             "team": "SV Zulte Waregem",
             "xp_pass_rating": 0.6973
-          }
-        ],
-        "Croácia": [
-          {
-            "rank": 11,
-            "player_name": "Adrion Pajaziti",
-            "position": "CM",
-            "age": 23,
-            "team": "HNK Hajduk Split",
-            "xp_pass_rating": 0.7241
           }
         ],
         "Eredivisie": [
@@ -338,7 +315,6 @@
       "pool_size": 186,
       "league_counts": {
         "Bélgica": 3,
-        "Croácia": 0,
         "Eredivisie": 2,
         "Grécia": 4,
         "Portugal": 4,
@@ -553,7 +529,6 @@
             "xp_pass_rating": 0.7975
           }
         ],
-        "Croácia": [],
         "Eredivisie": [
           {
             "rank": 1,
@@ -665,7 +640,6 @@
       "pool_size": 68,
       "league_counts": {
         "Bélgica": 2,
-        "Croácia": 2,
         "Eredivisie": 1,
         "Grécia": 3,
         "Portugal": 3,
@@ -707,30 +681,6 @@
           "league_source": "eredivise",
           "xp_pass_rating": 0.8239,
           "passes_completed": 1470
-        },
-        {
-          "rank": 4,
-          "player_id": "89346",
-          "player_name": "Ljuban Crepulja",
-          "position": "CM",
-          "age": 32,
-          "team": "NK Slaven Belupo",
-          "league": "Croácia",
-          "league_source": "croata",
-          "xp_pass_rating": 0.8205,
-          "passes_completed": 1188
-        },
-        {
-          "rank": 5,
-          "player_id": "243713",
-          "player_name": "Josip Mišić",
-          "position": "CM",
-          "age": 32,
-          "team": "GNK Dinamo Zagreb",
-          "league": "Croácia",
-          "league_source": "croata",
-          "xp_pass_rating": 0.8095,
-          "passes_completed": 1367
         },
         {
           "rank": 6,
@@ -870,24 +820,6 @@
             "age": 33,
             "team": "Cercle Brugge",
             "xp_pass_rating": 0.7416
-          }
-        ],
-        "Croácia": [
-          {
-            "rank": 4,
-            "player_name": "Ljuban Crepulja",
-            "position": "CM",
-            "age": 32,
-            "team": "NK Slaven Belupo",
-            "xp_pass_rating": 0.8205
-          },
-          {
-            "rank": 5,
-            "player_name": "Josip Mišić",
-            "position": "CM",
-            "age": 32,
-            "team": "GNK Dinamo Zagreb",
-            "xp_pass_rating": 0.8095
           }
         ],
         "Eredivisie": [

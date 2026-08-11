@@ -28,7 +28,7 @@ export const PROFILE_ALL_GROUP = {
   id: "all",
   title: "All Players",
   subtitle: "Full curated pool",
-  description: "All 45 midfielders ranked across six satellite European leagues.",
+  description: "All 42 midfielders ranked across five satellite European leagues.",
   accent: "#cbd5e1",
 } as const;
 
@@ -37,7 +37,7 @@ export const PLAYER_REPORT_CATEGORIES: PlayerReportCategory[] = [
     id: "u23-breakout",
     title: "U23 — Breakout Promises",
     subtitle: "Emerging profiles under 23",
-    description: "Young midfielders with standout pass profiles across Eredivisie, Belgium, Turkey, Greece, Croatia and Portugal.",
+    description: "Young midfielders with standout pass profiles across Eredivisie, Belgium, Turkey, Greece and Portugal.",
     accent: "#a78bfa",
     groups: [
       {
@@ -58,7 +58,6 @@ export const PLAYER_REPORT_CATEGORIES: PlayerReportCategory[] = [
       {
         label: "Extended watchlist",
         players: [
-          p("1065258"),
           p("997022"),
           p("1002146"),
           p("1188173"),
@@ -114,8 +113,6 @@ export const PLAYER_REPORT_CATEGORIES: PlayerReportCategory[] = [
           p("118085"),
           p("6562"),
           p("138842"),
-          p("89346"),
-          p("243713"),
           p("180511"),
           p("211116"),
           p("45853"),
