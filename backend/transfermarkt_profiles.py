@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import asyncio
+import re
+from datetime import datetime, timezone
 from typing import Any
 
 from player_profiles import (
@@ -10,6 +12,7 @@ from player_profiles import (
     _normalize_name,
     _normalize_team,
     _team_match_score,
+    format_height_display,
     read_cached_profile,
     update_player_profile_cache,
 )
@@ -23,6 +26,64 @@ MARKET_VALUE_DISPLAY_KEY = "market_value_display"
 MARKET_VALUE_UPDATED_KEY = "market_value_updated"
 TMKT_MAX_RETRIES = 4
 TMKT_RETRY_BACKOFF_SEC = 1.5
+TM_HTML_USER_AGENT = "Mozilla/5.0 (compatible; pass-scout/1.0)"
+
+
+def _format_tm_height(value: Any) -> str | None:
+    if value is None:
+        return None
+    try:
+        meters = float(value)
+    except (TypeError, ValueError):
+        return None
+    if 1.40 <= meters <= 2.20:
+        return f"{meters:.2f} m"
+    return None
+
+
+def _format_tm_foot(value: Any) -> str | None:
+    if value is None:
+        return None
+    if isinstance(value, dict):
+        value = value.get("name")
+    text = str(value or "").strip().lower()
+    if not text:
+        return None
+    if text == "both":
+        return "Both"
+    if text.startswith("left"):
+        return "Left"
+    if text.startswith("right"):
+        return "Right"
+    return text.title()
+
+
+def _age_from_iso_date(value: str | None) -> int | None:
+    if not value:
+        return None
+    try:
+        born = datetime.strptime(str(value)[:10], "%Y-%m-%d").date()
+    except ValueError:
+        return None
+    today = datetime.now(timezone.utc).date()
+    return today.year - born.year - ((today.month, today.day) < (born.month, born.day))
+
+
+async def _fetch_nationality_from_html(transfermarkt_id: str) -> str | None:
+    import aiohttp
+
+    url = f"https://www.transfermarkt.com/-/profil/spieler/{transfermarkt_id}"
+    headers = {"User-Agent": TM_HTML_USER_AGENT}
+    try:
+        async with aiohttp.ClientSession(headers=headers) as session:
+            async with session.get(url, timeout=aiohttp.ClientTimeout(total=12)) as resp:
+                html = await resp.text()
+    except Exception:
+        return None
+    match = re.search(r'itemprop="nationality"[^>]*>.*?title="([^"]+)"', html, flags=re.S)
+    if match:
+        return match.group(1).strip()
+    return None
 
 
 async def _tmkt_call_with_retry(coro_factory, *, label: str):
@@ -71,7 +132,11 @@ def _pick_tmkt_search_result(
     return best_row if best_score >= 0.45 else None
 
 
-def _transfermarkt_fields_from_player_payload(payload: dict[str, Any]) -> dict[str, Any]:
+def _transfermarkt_fields_from_player_payload(
+    payload: dict[str, Any],
+    *,
+    nationality: str | None = None,
+) -> dict[str, Any]:
     data = payload.get("data") if isinstance(payload.get("data"), dict) else payload
     current = (data.get("marketValueDetails") or {}).get("current") or {}
     value_eur = current.get("value")
@@ -86,13 +151,30 @@ def _transfermarkt_fields_from_player_payload(payload: dict[str, Any]) -> dict[s
     elif value_eur is not None:
         display = format_market_value_eur(int(value_eur))
     portrait = data.get("portraitUrl")
-    contract_until = (data.get("attributes") or {}).get("contractUntil")
+    attrs = data.get("attributes") or {}
+    contract_until = attrs.get("contractUntil")
+    life_dates = data.get("lifeDates") or {}
+    date_of_birth = life_dates.get("dateOfBirth")
+    age = life_dates.get("age")
+    if age is None:
+        age = _age_from_iso_date(str(date_of_birth) if date_of_birth else None)
+    height = _format_tm_height(attrs.get("height"))
+    dominant_foot = _format_tm_foot(attrs.get("preferredFoot"))
+    photo_url = str(portrait) if portrait else None
     return {
         MARKET_VALUE_EUR_KEY: int(value_eur) if value_eur is not None else None,
         MARKET_VALUE_DISPLAY_KEY: display,
         MARKET_VALUE_UPDATED_KEY: current.get("determined"),
-        TRANSFERMARKT_PHOTO_URL_KEY: str(portrait) if portrait else None,
+        TRANSFERMARKT_PHOTO_URL_KEY: photo_url,
+        "photo_url": photo_url,
         CONTRACT_UNTIL_KEY: str(contract_until)[:10] if contract_until else None,
+        "date_of_birth": str(date_of_birth)[:10] if date_of_birth else None,
+        "age": int(age) if age is not None else None,
+        "height": height,
+        "dominant_foot": dominant_foot,
+        "nationality": nationality,
+        "source": "transfermarkt",
+        "fetch_status": "ok",
     }
 
 
@@ -161,6 +243,8 @@ def transfermarkt_cache_is_fresh(player_id: str, *, force: bool = False) -> bool
     profile = read_cached_profile(player_id)
     if not profile:
         return False
+    if profile.get(TRANSFERMARKT_ID_KEY) and profile.get("age") is not None and profile.get("nationality"):
+        return True
     if profile.get(MARKET_VALUE_EUR_KEY) is not None or profile.get(MARKET_VALUE_DISPLAY_KEY):
         return True
     return profile.get(TRANSFERMARKT_FETCH_STATUS_KEY) == "not_found"
@@ -215,8 +299,16 @@ async def fetch_transfermarkt_market_value_async(
             lambda pid=player_id: tmkt.get_player(pid),
             label=f"player:{player_id}",
         )
-        fields = _transfermarkt_fields_from_player_payload(payload if isinstance(payload, dict) else {})
-        status = "ok" if fields.get(MARKET_VALUE_EUR_KEY) is not None else "not_found"
+        nationality = await _fetch_nationality_from_html(str(player_id))
+        fields = _transfermarkt_fields_from_player_payload(
+            payload if isinstance(payload, dict) else {},
+            nationality=nationality,
+        )
+        status = "ok" if (
+            fields.get(MARKET_VALUE_EUR_KEY) is not None
+            or fields.get("age") is not None
+            or fields.get(TRANSFERMARKT_PHOTO_URL_KEY)
+        ) else "not_found"
         return {
             TRANSFERMARKT_ID_KEY: str(player_id),
             TRANSFERMARKT_FETCH_STATUS_KEY: status,
