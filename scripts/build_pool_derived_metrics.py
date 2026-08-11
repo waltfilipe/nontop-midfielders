@@ -12,7 +12,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-_BACKEND = Path(__file__).resolve().parents[2] / "xpv-xp_site" / "backend"
+_BACKEND = Path(__file__).resolve().parents[1] / "backend"
 if str(_BACKEND) not in sys.path:
     sys.path.insert(0, str(_BACKEND))
 
@@ -23,6 +23,7 @@ import xp_engine as xe  # noqa: E402
 import xp_stats_engine as xstats  # noqa: E402
 
 OUTPUT = Path(__file__).resolve().parents[1] / "data" / "pool-derived-metrics.json"
+CURATED_IDS_PATH = Path(__file__).resolve().parents[1] / "data" / "player-ids.json"
 POSITION_FAMILY = "midfielders"
 
 
@@ -88,11 +89,15 @@ def rank_desc(values: list[tuple[str, float]]) -> dict[str, tuple[int, int]]:
 
 
 def main() -> None:
-    print("Loading full midfielder pool…")
+    print("Loading curated midfielder pool…")
+    curated_ids = {str(pid) for pid in json.loads(CURATED_IDS_PATH.read_text(encoding="utf-8"))}
     pool_path = _BACKEND / "data" / "api_pool_midfielders.json"
     with pool_path.open(encoding="utf-8") as fh:
         pool_payload = json.load(fh)
-    analysis_players = pool_payload.get("players", pool_payload)
+    analysis_players = [
+        p for p in pool_payload.get("players", pool_payload)
+        if str(p.get("player_id", "")) in curated_ids
+    ]
     xp_passes_by_player = xe.load_european_league_xp_passes_grouped(POSITION_FAMILY)
 
     records: dict[str, dict[str, Any]] = {}

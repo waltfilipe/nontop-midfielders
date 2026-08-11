@@ -8,8 +8,10 @@ import math
 from collections import defaultdict
 from pathlib import Path
 
-POOL_PATH = Path("/agent/repos/nontop-midfielders/backend/data/api_pool_midfielders.json")
-OUTPUT_DIR = Path(__file__).resolve().parents[1] / "data"
+ROOT = Path(__file__).resolve().parents[1]
+POOL_PATH = ROOT / "backend" / "data" / "api_pool_midfielders.json"
+OUTPUT_DIR = ROOT / "data"
+CURATED_IDS_PATH = OUTPUT_DIR / "player-ids.json"
 
 
 def _pctile(values: list[float], q: float) -> float:
@@ -69,7 +71,8 @@ def _impact_index_ranks(players: list[dict]) -> dict[str, dict[str, int]]:
 
 def main() -> None:
     payload = json.loads(POOL_PATH.read_text(encoding="utf-8"))
-    players = payload["players"]
+    curated_ids = {str(pid) for pid in json.loads(CURATED_IDS_PATH.read_text(encoding="utf-8"))}
+    players = [p for p in payload["players"] if str(p.get("player_id", "")) in curated_ids]
 
     ref_rows: list[dict] = []
     metric_rows: list[dict] = []

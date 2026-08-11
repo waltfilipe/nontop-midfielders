@@ -180,7 +180,7 @@ export function ComparePlayerCard({
             <div className="identity-fact">
               <FactIcon icon="fa-cake-candles" />
               <span className="identity-fact-label">{m.common.age}</span>
-              <span className="identity-fact-value tabular">{player.age != null ? String(player.age) : "—"}</span>
+              <span className="identity-fact-value">{player.age != null ? String(player.age) : "—"}</span>
             </div>
             <div className="identity-fact">
               <FactIcon icon="fa-ruler-vertical" />
@@ -212,7 +212,7 @@ export function ComparePlayerCard({
         </div>
         <div className="identity-meta-pill">
           <span><FactIcon icon="fa-clock" /> {m.common.minutes}</span>
-          <strong className="tabular">{player.minutes != null ? String(player.minutes) : "—"}</strong>
+          <strong>{player.minutes != null ? String(player.minutes) : "—"}</strong>
         </div>
       </div>
 

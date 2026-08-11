@@ -243,7 +243,7 @@ export function PlayerReportSheet({
               <div className="identity-fact">
                 <FactIcon icon="fa-cake-candles" />
                 <span className="identity-fact-label">{m.common.age}</span>
-                <span className="identity-fact-value tabular">
+                <span className="identity-fact-value">
                   {p.age != null ? String(p.age) : "—"}
                 </span>
               </div>
@@ -267,7 +267,7 @@ export function PlayerReportSheet({
 
           {compact && (
             <div className="identity-facts identity-facts-compact">
-              <span className="identity-fact-inline tabular">
+              <span className="identity-fact-inline">
                 {p.age != null ? m.reports.ageYears.replace("{age}", String(p.age)) : "—"}
               </span>
               <span className="identity-fact-inline">{String(p.league_source ?? p.league ?? "—")}</span>
@@ -299,7 +299,7 @@ export function PlayerReportSheet({
           }
         >
           <span><FactIcon icon="fa-clock" /> {m.common.minutes}</span>
-          <strong className="tabular">{p.minutes != null ? String(p.minutes) : "—"}</strong>
+          <strong>{p.minutes != null ? String(p.minutes) : "—"}</strong>
         </div>
       </div>
 

@@ -87,7 +87,7 @@ export function ProfileView({
                   <div className="identity-fact">
                     <FactIcon icon="fa-cake-candles" />
                     <span className="identity-fact-label">{m.common.age}</span>
-                    <span className="identity-fact-value tabular">{p.age != null ? String(p.age) : "—"}</span>
+                    <span className="identity-fact-value">{p.age != null ? String(p.age) : "—"}</span>
                   </div>
                   <div className="identity-fact">
                     <FactIcon icon="fa-ruler-vertical" />
@@ -119,7 +119,7 @@ export function ProfileView({
               </div>
               <div className="identity-meta-pill">
                 <span><FactIcon icon="fa-clock" /> {m.common.minutes}</span>
-                <strong className="tabular">{p.minutes != null ? String(p.minutes) : "—"}</strong>
+                <strong>{p.minutes != null ? String(p.minutes) : "—"}</strong>
               </div>
             </div>
 
