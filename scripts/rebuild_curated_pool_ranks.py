@@ -68,6 +68,15 @@ def _apply_rank_fields(rows: dict[str, dict[str, Any]], xp_rows: dict[str, dict[
                         xp_rows[pid][rank_key] = rank
 
 
+def _merge_xp_into_player(player: dict[str, Any], xp: dict[str, Any]) -> dict[str, Any]:
+    """Merge xp metrics into player without wiping identity fields with null xp values."""
+    merged = dict(player)
+    for key, value in xp.items():
+        if value is not None:
+            merged[key] = value
+    return merged
+
+
 def _rebuild_profile_sections(profile: dict[str, Any]) -> None:
     sys_path = ROOT / "backend"
     if str(sys_path) not in __import__("sys").path:
@@ -100,7 +109,7 @@ def main() -> None:
         xp = xp_rows[pid]
         profile["xp"] = xp
         if profile.get("player"):
-            profile["player"] = {**profile["player"], **xp}
+            profile["player"] = _merge_xp_into_player(profile["player"], xp)
         _rebuild_profile_sections(profile)
         (PROFILES_DIR / f"{pid}.json").write_text(json.dumps(profile, ensure_ascii=False), encoding="utf-8")
 
